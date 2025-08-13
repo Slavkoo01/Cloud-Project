@@ -8,9 +8,7 @@
         </Bindings>
       </Site>
     </Sites>
-    <ConfigurationSettings>
-      <Setting name="DataConnectionString" />
-    </ConfigurationSettings>
+    <ConfigurationSettings />
     <Endpoints>
       <InputEndpoint name="Endpoint1" protocol="http" port="80" />
     </Endpoints>

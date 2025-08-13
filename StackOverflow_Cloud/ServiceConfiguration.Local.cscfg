@@ -5,7 +5,7 @@
     <ConfigurationSettings />
   </Role>
   <Role name="NotificationService">
-    <Instances count="1" />
+    <Instances count="3" />
     <ConfigurationSettings />
   </Role>
   <Role name="HealthMonitoringService">

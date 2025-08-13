@@ -15,6 +15,9 @@
   </WebRole>
   <WorkerRole name="NotificationService" vmsize="Standard_D1_v2">
     <ConfigurationSettings />
+    <Endpoints>
+      <InternalEndpoint name="health-monitoring" protocol="tcp" />
+    </Endpoints>
   </WorkerRole>
   <WorkerRole name="HealthMonitoringService" vmsize="Standard_D1_v2">
     <ConfigurationSettings>

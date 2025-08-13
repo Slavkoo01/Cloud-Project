@@ -16,6 +16,7 @@ namespace NotificationService
         private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         private readonly ManualResetEvent runCompleteEvent = new ManualResetEvent(false);
 
+        private NotificationServiceServer server = new NotificationServiceServer();
         public override void Run()
         {
             Trace.TraceInformation("NotificationService is running");
@@ -42,7 +43,7 @@ namespace NotificationService
             // see the MSDN topic at https://go.microsoft.com/fwlink/?LinkId=166357.
 
             bool result = base.OnStart();
-
+            server.Open();
             Trace.TraceInformation("NotificationService has been started");
 
             return result;
@@ -56,7 +57,7 @@ namespace NotificationService
             this.runCompleteEvent.WaitOne();
 
             base.OnStop();
-
+            server.Close();
             Trace.TraceInformation("NotificationService has stopped");
         }
 

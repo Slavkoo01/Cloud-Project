@@ -17,5 +17,18 @@ namespace StackOverflowService
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
         }
+        protected void Application_BeginRequest(object sender, EventArgs e)
+        {
+            HttpContext.Current.Response.AddHeader("Access-Control-Allow-Origin", "http://localhost:5173");
+            HttpContext.Current.Response.AddHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+            HttpContext.Current.Response.AddHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+            if (HttpContext.Current.Request.HttpMethod == "OPTIONS")
+            {
+                HttpContext.Current.Response.StatusCode = 200;
+                HttpContext.Current.Response.End();
+            }
+        }
+
     }
 }

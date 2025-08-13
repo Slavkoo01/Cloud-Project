@@ -1,3 +1,4 @@
+using Contracts;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.Diagnostics;
 using Microsoft.WindowsAzure.ServiceRuntime;
@@ -6,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.ServiceModel;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,6 +18,7 @@ namespace HealthMonitoringService
         private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         private readonly ManualResetEvent runCompleteEvent = new ManualResetEvent(false);
 
+        private HealthMonitoringServer hms;
         public override void Run()
         {
             Trace.TraceInformation("HealthMonitoringService is running");
@@ -43,6 +46,9 @@ namespace HealthMonitoringService
 
             bool result = base.OnStart();
 
+            hms = new HealthMonitoringServer();
+            hms.Open();
+
             Trace.TraceInformation("HealthMonitoringService has been started");
 
             return result;
@@ -56,6 +62,8 @@ namespace HealthMonitoringService
             this.runCompleteEvent.WaitOne();
 
             base.OnStop();
+
+            hms.Close();
 
             Trace.TraceInformation("HealthMonitoringService has stopped");
         }

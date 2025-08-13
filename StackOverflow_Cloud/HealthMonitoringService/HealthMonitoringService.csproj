@@ -48,11 +48,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="HealthMonitoringServer.cs" />
+    <Compile Include="HealthMonitoringServerProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WorkerRole.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Contracts\Contracts.csproj">
+      <Project>{7FD06B1A-512E-4339-9945-94F0DC28AF21}</Project>
+      <Name>Contracts</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\ServiceDataRepo\ServiceDataRepo.csproj">
+      <Project>{DB2FDEA3-0587-4B12-A51E-12DAEC8CB3B8}</Project>
+      <Name>ServiceDataRepo</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

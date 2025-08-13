@@ -5,16 +5,17 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Repositories.Repositories
+namespace Repositories.TableRepositories
 {
-    public class BaseRepository<T> where T : TableEntity, new()
+    public class BaseTableRepository<T> where T : TableEntity, new()
     {
         private readonly CloudTable _table;
 
-        public BaseRepository(string tableName)
+        private string connectionString = "DataConnectionString";
+        public BaseTableRepository(string tableName)
         {
             var storageAccount = CloudStorageAccount.Parse(
-                CloudConfigurationManager.GetSetting("DataConnectionString"));
+                CloudConfigurationManager.GetSetting(connectionString));
 
             var tableClient = storageAccount.CreateCloudTableClient();
             _table = tableClient.GetTableReference(tableName);

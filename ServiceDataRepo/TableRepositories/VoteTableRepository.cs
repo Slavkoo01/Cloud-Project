@@ -1,4 +1,4 @@
-﻿using Repositories.Repositories;
+﻿using Repositories.TableRepositories;
 using ServiceDataRepo.Entities;
 using System;
 using System.Collections.Generic;
@@ -6,11 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ServiceDataRepo.Repositories
+namespace ServiceDataRepo.TableRepositories
 {
-    public class VoteRepository : BaseRepository<VoteEntity>
+    public class VoteTableRepository : BaseTableRepository<VoteEntity>
     {
-        public VoteRepository()
+        public VoteTableRepository()
             : base("Votes") { }
     }
 }

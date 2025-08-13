@@ -191,6 +191,7 @@
     <Compile Include="Entities\UserEntity.cs" />
     <Compile Include="Entities\VoteEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+<<<<<<< HEAD
     <Compile Include="QueueRepositories\NotificationQueueRepository.cs" />
     <Compile Include="TableRepositories\AlertEmailTableRepository.cs" />
     <Compile Include="TableRepositories\AnswerTableRepository.cs" />
@@ -200,6 +201,10 @@
     <Compile Include="TableRepositories\QuestionTableRepository.cs" />
     <Compile Include="TableRepositories\UserTableRepository.cs" />
     <Compile Include="TableRepositories\VoteTableRepository.cs" />
+=======
+    <Compile Include="Repositories\AlertEmailDataRepo.cs" />
+    <Compile Include="Repositories\BaseRepository.cs" />
+>>>>>>> 40954910963cb0e83456abbf78de02c35e63cf41
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Helpers\" />

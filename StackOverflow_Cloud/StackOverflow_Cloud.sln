@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36401.2 d17.14
+VisualStudioVersion = 17.14.36401.2
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{CC5FD16D-436D-48AD-A40C-5A424C6E3E79}") = "StackOverflow_Cloud", "StackOverflow_Cloud.ccproj", "{58A040C4-4010-4DC1-B291-569A78CF26C6}"
 EndProject
@@ -16,6 +16,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts", "..\Contracts\Contracts.csproj", "{7FD06B1A-512E-4339-9945-94F0DC28AF21}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceDataRepo", "..\ServiceDataRepo\ServiceDataRepo.csproj", "{DB2FDEA3-0587-4B12-A51E-12DAEC8CB3B8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdminToolsConsoleApp", "..\AdminToolsConsoleApp\AdminToolsConsoleApp.csproj", "{9CA62107-495A-49F9-AF99-3976353212BB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +53,10 @@ Global
 		{DB2FDEA3-0587-4B12-A51E-12DAEC8CB3B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DB2FDEA3-0587-4B12-A51E-12DAEC8CB3B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DB2FDEA3-0587-4B12-A51E-12DAEC8CB3B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9CA62107-495A-49F9-AF99-3976353212BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CA62107-495A-49F9-AF99-3976353212BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CA62107-495A-49F9-AF99-3976353212BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CA62107-495A-49F9-AF99-3976353212BB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

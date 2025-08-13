@@ -10,7 +10,9 @@
   </Role>
   <Role name="HealthMonitoringService">
     <Instances count="1" />
-    <ConfigurationSettings />
+    <ConfigurationSettings>
+      <Setting name="DataConnectionString" value="UseDevelopmentStorage=true" />
+    </ConfigurationSettings>
   </Role>
   <Role name="HealthStatusService">
     <Instances count="1" />

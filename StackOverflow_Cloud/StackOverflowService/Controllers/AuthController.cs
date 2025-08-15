@@ -12,17 +12,7 @@ namespace YourNamespace.Controllers
     [RoutePrefix("api/auth")]
     public class AuthController : ApiController
     {
-
-        [HttpGet]
-        [Route("test")]
-        public IHttpActionResult Test()
-        {
-        
-
-            return Ok("API is working! ");
-        }
-
-        private readonly UserTableRepository users = new UserTableRepository();
+        private readonly UserTableRepository usersRepo = new UserTableRepository();
 
         public AuthController() { }
 
@@ -52,16 +42,21 @@ namespace YourNamespace.Controllers
             {
                 return BadRequest("Missing required fields: " + string.Join(", ", missingFields));
             }
+            var users = usersRepo.GetAll().ToList();
 
-            var existing = users.GetAll().ToList().FirstOrDefault(u => u.Email == req.Email);
+            var existing = users.FirstOrDefault(u => u.Email == req.Email);
             if (existing != null)
             {
                return Content(HttpStatusCode.Conflict, "Email already exists");
             }
+            existing = users.FirstOrDefault(u => u.Username == req.Username);
+            if (existing != null)
+            {
+                return Content(HttpStatusCode.Conflict, "Username already exists");
+            }
 
-            
-             
-            users.Insert(new UserEntity(req.Email)
+
+            usersRepo.Insert(new UserEntity(req.Username)
             {
                 Name = req.Name,
                 LastName = req.LastName,
@@ -69,6 +64,7 @@ namespace YourNamespace.Controllers
                 Country = req.Country,
                 City = req.City,
                 Address = req.Address,
+                Email = req.Email,
                 Password = req.Password 
             });
 
@@ -79,7 +75,7 @@ namespace YourNamespace.Controllers
         [Route("login")]
         public IHttpActionResult Login(UserEntity req)
         {
-            var user = users.GetAll().ToList().FirstOrDefault(u => u.Email == req.Email && u.Password == req.Password);
+            var user = usersRepo.GetAll().ToList().FirstOrDefault(u => u.Email == req.Email && u.Password == req.Password);
             if (user == null)
             {
                 return Content(HttpStatusCode.Unauthorized, "Invalid credentials");

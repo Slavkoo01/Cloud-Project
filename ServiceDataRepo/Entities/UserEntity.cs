@@ -12,16 +12,17 @@ namespace ServiceDataRepo.Entities
     {
         public UserEntity() { }
 
-        public UserEntity(string email)
+        public UserEntity(string username)
         {
             PartitionKey = "User";
-            RowKey = Guid.NewGuid().ToString();
-            Email = email;
+            RowKey = username;
+            Username = username;
             CreatedAt = DateTime.UtcNow;
         }
 
         public string Name { get; set; }
         public string LastName { get; set; }
+        public string Username { get; set; }    
         public string Gender { get; set; }
         public string Country { get; set; }
         public string City { get; set; }

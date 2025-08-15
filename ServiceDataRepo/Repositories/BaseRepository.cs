@@ -9,16 +9,21 @@ namespace Repositories.Repositories
 {
     public class BaseRepository<T> where T : TableEntity, new()
     {
-        private readonly CloudTable _table;
-
+        public readonly CloudTable _table;
+        private string connectionString = "DataConnectionString";
+        private string configurationSetting = "UseDevelopmentStorage=true"; //I don't know man config manager doesnt work for me
+        private CloudStorageAccount storageAccount;
         public BaseRepository(string tableName)
         {
-            var storageAccount = CloudStorageAccount.Parse(
-                CloudConfigurationManager.GetSetting("DataConnectionString"));
 
-            var tableClient = storageAccount.CreateCloudTableClient();
+            storageAccount =
+            CloudStorageAccount.Parse(configurationSetting);
+            CloudTableClient tableClient = new CloudTableClient(new
+            Uri(storageAccount.TableEndpoint.AbsoluteUri), storageAccount.Credentials);
+
             _table = tableClient.GetTableReference(tableName);
             _table.CreateIfNotExists();
+
         }
 
         public IQueryable<T> GetAll(string partitionKey = null)

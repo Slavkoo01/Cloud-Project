@@ -20,7 +20,8 @@ namespace ServiceDataRepo.Entities
             CreatedAt = DateTime.UtcNow;
         }
 
-        public string FullName { get; set; }
+        public string Name { get; set; }
+        public string LastName { get; set; }
         public string Gender { get; set; }
         public string Country { get; set; }
         public string City { get; set; }

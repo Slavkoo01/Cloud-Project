@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ServiceConfiguration serviceName="StackOverflow_Cloud" xmlns="http://schemas.microsoft.com/ServiceHosting/2008/10/ServiceConfiguration" osFamily="6" osVersion="*" schemaVersion="2015-04.2.6">
-  <Role name="StackOverflowService">
-    <Instances count="1" />
-    <ConfigurationSettings />
-  </Role>
   <Role name="NotificationService">
     <Instances count="3" />
     <ConfigurationSettings />
@@ -17,6 +13,12 @@
   <Role name="HealthStatusService">
     <Instances count="1" />
     <ConfigurationSettings />
+  </Role>
+  <Role name="StackOverflowService">
+    <Instances count="1" />
+    <ConfigurationSettings>
+      <Setting name="DataConnectionString" value="UseDevelopmentStorage=true" />
+    </ConfigurationSettings>
   </Role>
   <NetworkConfiguration>
     <VirtualNetworkSite name="stackoverflow_cloudVNet" />
@@ -37,6 +39,11 @@
         </Subnets>
       </InstanceAddress>
       <InstanceAddress roleName="HealthStatusService">
+        <Subnets>
+          <Subnet name="WebTier" />
+        </Subnets>
+      </InstanceAddress>
+      <InstanceAddress roleName="WebRole1">
         <Subnets>
           <Subnet name="WebTier" />
         </Subnets>

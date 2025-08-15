@@ -66,7 +66,7 @@
     </ProjectReference>
     <ProjectReference Include="StackOverflowService\StackOverflowService.csproj">
       <Name>StackOverflowService</Name>
-      <Project>{d779b265-923f-4ea3-b6f0-ba0bd9b96956}</Project>
+      <Project>{935a686f-39fc-4921-9743-5f49e180f50c}</Project>
       <Private>True</Private>
       <RoleType>Web</RoleType>
       <RoleName>StackOverflowService</RoleName>

@@ -52,11 +52,11 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Contracts\Contracts.csproj">
-      <Project>{7FD06B1A-512E-4339-9945-94F0DC28AF21}</Project>
+      <Project>{7fd06b1a-512e-4339-9945-94f0dc28af21}</Project>
       <Name>Contracts</Name>
     </ProjectReference>
     <ProjectReference Include="..\ServiceDataRepo\ServiceDataRepo.csproj">
-      <Project>{DB2FDEA3-0587-4B12-A51E-12DAEC8CB3B8}</Project>
+      <Project>{db2fdea3-0587-4b12-a51e-12daec8cb3b8}</Project>
       <Name>ServiceDataRepo</Name>
     </ProjectReference>
   </ItemGroup>

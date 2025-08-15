@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Contracts;
 using ServiceDataRepo.Entities;
+using ServiceDataRepo.Repositories;
 
 namespace AdminToolsConsoleApp
 {
@@ -61,6 +62,7 @@ namespace AdminToolsConsoleApp
 
         static void Main(string[] args)
         {
+            AlertEmailDataRepo alertEmailRepo1 = new AlertEmailDataRepo();
             Connect();
             bool exit = true;
             

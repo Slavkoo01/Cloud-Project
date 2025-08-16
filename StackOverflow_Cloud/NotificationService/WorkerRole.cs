@@ -1,11 +1,14 @@
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.Diagnostics;
 using Microsoft.WindowsAzure.ServiceRuntime;
+using Microsoft.WindowsAzure.Storage.Queue;
+using ServiceDataRepo.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Net.Mail;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,15 +22,34 @@ namespace NotificationService
         private NotificationServiceServer server = new NotificationServiceServer();
         public override void Run()
         {
+            CloudQueue queue = QueueHelper.GetQueueReference("admin-notifications-queue");
+
             Trace.TraceInformation("NotificationService is running");
 
-            try
+            while (true)
             {
-                this.RunAsync(this.cancellationTokenSource.Token).Wait();
-            }
-            finally
-            {
-                this.runCompleteEvent.Set();
+                CloudQueueMessage message = queue.GetMessage();
+                if (message == null)
+                {
+                    Trace.TraceInformation("Trenutno ne postoji poruka u redu.", "Information");
+                }
+                else
+                {
+                    Trace.TraceInformation(String.Format("Poruka glasi: {0}", message.AsString), "Information");
+
+                    if (message.DequeueCount > 3)
+                    {
+                        queue.DeleteMessage(message);
+                    }
+
+                    // sta raditi sa por
+                    SendAlertEmails(message.AsString).GetAwaiter().GetResult();
+                    queue.DeleteMessage(message);
+                    Trace.TraceInformation($"Poruka procesuirana: {message.AsString}", "Information");
+                }
+
+                Thread.Sleep(5000);
+                Trace.TraceInformation("Working", "Information");
             }
         }
 
@@ -59,6 +81,42 @@ namespace NotificationService
             base.OnStop();
             server.Close();
             Trace.TraceInformation("NotificationService has stopped");
+        }
+
+        //srediti ovo poslijeee - myb odvojiti ovaj dio za slanje
+        private async Task SendAlertEmails(string message)
+        {
+            // ovo mozemo u konfig
+            var smtpHost = "smtp.gmail.com";
+            var smtpPort = 587;
+            var smtpUsername = "projekat.drs6@gmail.com";
+            var smtpPassword = "mlfb ayje vbez nnch";
+            //------------------------
+
+            string subject = String.Empty;
+            string alertEmail = String.Empty;
+            string body = String.Empty;
+
+            if (message.StartsWith("HEALTHCHECK;"))
+            {
+                message = message.Substring("HEALTHCHECK;".Length);
+                var parts = message.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+
+                subject = parts[0].Split(new char[] { ':' }, 2)[1].Trim();
+                alertEmail = parts[1].Split(new char[] { ':' }, 2)[1].Trim();
+                body = parts[2].Split(new char[] { ':' }, 2)[1].Trim();
+            }
+
+            using (var smtp = new SmtpClient(smtpHost, smtpPort))
+            {
+                smtp.Credentials = new NetworkCredential(smtpUsername, smtpPassword);
+                smtp.EnableSsl = true;
+
+                var email = new MailMessage(smtpUsername, alertEmail, subject, body);
+                email.IsBodyHtml = true;
+
+                await smtp.SendMailAsync(email);
+            }
         }
 
         private async Task RunAsync(CancellationToken cancellationToken)

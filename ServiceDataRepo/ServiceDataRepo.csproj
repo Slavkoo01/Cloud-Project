@@ -114,6 +114,7 @@
     <Compile Include="Entities\QuestionEntity.cs" />
     <Compile Include="Entities\UserEntity.cs" />
     <Compile Include="Entities\VoteEntity.cs" />
+    <Compile Include="Helpers\QueueHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueueRepository\NotificationQueueRepository.cs" />
     <Compile Include="Repositories\AlertEmailDataRepo.cs" />
@@ -125,9 +126,7 @@
     <Compile Include="Repositories\UserTableRepository.cs" />
     <Compile Include="Repositories\VoteTableRepository.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Helpers\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />

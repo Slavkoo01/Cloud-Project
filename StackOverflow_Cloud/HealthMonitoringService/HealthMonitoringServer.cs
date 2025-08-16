@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.ServiceModel;
 using System.Timers;
 using Contracts;
 using Microsoft.WindowsAzure.ServiceRuntime;
+using Microsoft.WindowsAzure.Storage.Queue;
 using ServiceDataRepo.Entities;
+using ServiceDataRepo.Helpers;
 using ServiceDataRepo.Repositories;
 
 namespace HealthMonitoringService
@@ -35,6 +38,9 @@ namespace HealthMonitoringService
         {
             try
             {
+                // Ovdje dodati i za dr servis healthCheck 
+                // defff srediti kod
+
                 // Prolazi kroz sve instance NotificationService
                 foreach (var instance in RoleEnvironment.Roles["NotificationService"].Instances)
                 {
@@ -49,8 +55,10 @@ namespace HealthMonitoringService
                         if (isAlive)
                             Trace.TraceInformation($"NotificationService instance {instance.Id} OK.");
                         else
+                        {
+                            FailedHealthCheck("NotificationService");
                             Trace.TraceWarning($"NotificationService instance {instance.Id} NOT OK!");
-
+                        }
                         HealthCheckLog("NotificationService", isAlive ? "OK" : "NOT_OK");
 
                     }
@@ -65,6 +73,24 @@ namespace HealthMonitoringService
             {
                 Trace.TraceError($"HealthMonitoringServer error: {ex.Message}");
             }
+        }
+
+        private void FailedHealthCheck(string serviceName)
+        {
+            // alert mejlovi u red
+            AlertEmailDataRepo aedr = new AlertEmailDataRepo();
+            List<AlertEmailEntity> alertEmails = aedr.RetrieveAllAlertEmails().ToList();
+            CloudQueue queue = QueueHelper.GetQueueReference("admin-notifications-queue");
+
+            foreach (AlertEmailEntity email in alertEmails)
+            {
+                string subject = $"Failed Health Check - {serviceName}";
+                string body = $"Servis: {serviceName}\nStatus: NOT_OK\nVreme: {DateTime.UtcNow}";
+                string messageText = $"HEALTHCHECK;Subject:{subject};To:{email.Email};Body:{body}";
+
+                queue.AddMessage(new CloudQueueMessage(messageText), null, TimeSpan.FromMilliseconds(30));
+            }
+            //da li ovdje ili u notification servis praviti notificationLog
         }
 
         private void HealthCheckLog(string serviceName, string status)

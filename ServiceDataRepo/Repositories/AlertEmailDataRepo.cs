@@ -7,22 +7,26 @@ using Microsoft.Azure;
 using Microsoft.WindowsAzure.Storage.Table;
 using Microsoft.WindowsAzure.Storage;
 using ServiceDataRepo.Entities;
+using Repositories.Repositories;
 
 namespace ServiceDataRepo.Repositories
 {
-    public class AlertEmailDataRepo
+    public class AlertEmailDataRepo : BaseRepository<AlertEmailEntity>
     {
+        /*
         // metode po uzoru na zad sa zadnjih vj
         private CloudStorageAccount _storageAccount;
         private CloudTable _table;
-        public AlertEmailDataRepo()
+        */
+        public AlertEmailDataRepo() : base("AlertEmailTable")
         {
+            /*
             _storageAccount = CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("DataConnectionString"));
             CloudTableClient tableClient = new CloudTableClient(new Uri(_storageAccount.TableEndpoint.AbsoluteUri), _storageAccount.Credentials);
             _table = tableClient.GetTableReference("AlertEmailTable");
             _table.CreateIfNotExists();
+            */
         }
-
         public IQueryable<AlertEmailEntity> RetrieveAllAlertEmails()
         {
             var results = from g in _table.CreateQuery<AlertEmailEntity>()

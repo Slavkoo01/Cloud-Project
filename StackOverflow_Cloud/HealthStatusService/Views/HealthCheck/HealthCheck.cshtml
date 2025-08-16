@@ -1,0 +1,62 @@
+﻿@model HealthStatusService.ViewModel.HealthStatusViewModel
+
+@{
+    ViewBag.Title = "Health Status";
+}
+
+<h2>Health Status (last 3h)</h2>
+
+<div style="width: 400px; margin-bottom: 30px;">
+    <canvas id="healthChart"></canvas>
+</div>
+
+<p><strong>Available:</strong> @Model.AvailablePercent %</p>
+<p><strong>Unavailable:</strong> @Model.UnavailablePercent %</p>
+
+<hr />
+
+<h3>Details:</h3>
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>Service Name</th>
+            <th>Status</th>
+            <th>Checked At (UTC)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var record in Model.Records)
+        {
+            <tr>
+                <td>@record.ServiceName</td>
+                <td style="color:@(record.Status == "OK" ? "green" : "red")">
+                    @record.Status
+                </td>
+                <td>@record.CheckedAt.ToString("yyyy-MM-dd HH:mm:ss")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var ctx = document.getElementById('healthChart').getContext('2d');
+    var chart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: ['Available', 'Unavailable'],
+            datasets: [{
+                data: [@Model.AvailablePercent, @Model.UnavailablePercent],
+                backgroundColor: ['#4CAF50', '#F44336']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+</script>

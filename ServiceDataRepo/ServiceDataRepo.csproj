@@ -119,7 +119,7 @@
     <Compile Include="Repositories\AlertEmailDataRepo.cs" />
     <Compile Include="Repositories\AnswerTableRepository.cs" />
     <Compile Include="Repositories\BaseRepository.cs" />
-    <Compile Include="Repositories\HealthCheckTableRepositoy.cs" />
+    <Compile Include="Repositories\HealthCheckDataRepositoy.cs" />
     <Compile Include="Repositories\NotificationLogTableRepository.cs" />
     <Compile Include="Repositories\QuestionTableRepository.cs" />
     <Compile Include="Repositories\UserTableRepository.cs" />

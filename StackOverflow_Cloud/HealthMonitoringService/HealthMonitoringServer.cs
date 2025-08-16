@@ -5,6 +5,8 @@ using System.ServiceModel;
 using System.Timers;
 using Contracts;
 using Microsoft.WindowsAzure.ServiceRuntime;
+using ServiceDataRepo.Entities;
+using ServiceDataRepo.Repositories;
 
 namespace HealthMonitoringService
 {
@@ -48,17 +50,34 @@ namespace HealthMonitoringService
                             Trace.TraceInformation($"NotificationService instance {instance.Id} OK.");
                         else
                             Trace.TraceWarning($"NotificationService instance {instance.Id} NOT OK!");
+
+                        HealthCheckLog("NotificationService", isAlive ? "OK" : "NOT_OK");
+
                     }
                     catch (Exception exInstance)
                     {
                         Trace.TraceError($"Error connecting to NotificationService instance {instance.Id}: {exInstance.Message}");
                     }
+
                 }
             }
             catch (Exception ex)
             {
                 Trace.TraceError($"HealthMonitoringServer error: {ex.Message}");
             }
+        }
+
+        private void HealthCheckLog(string serviceName, string status)
+        {
+            HealthCheckDataRepository hctr = new HealthCheckDataRepository();
+            hctr.AddHealthCheckEntity(new HealthCheckEntity(serviceName, status));
+            var fromList = hctr.RetrieveAllNotificationkServiceHealthCheckEntities();
+            /*
+            foreach (var from in fromList)
+            {
+                Trace.TraceInformation($"HealthCheckEntity: {from.PartitionKey}, {from.RowKey}, {from.Status}, {from.CheckedAt}");
+            }
+            */
         }
 
         public void Open()

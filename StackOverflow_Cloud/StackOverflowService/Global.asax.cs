@@ -29,11 +29,16 @@ namespace StackOverflowService
             try
             {
                 // read account configuration settings
-                var storageAccount =
-                CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("DataConnectionString"));
+                var setting= CloudConfigurationManager.GetSetting("DataConnectionString");
+                if (string.IsNullOrEmpty(setting))
+                {
+                    throw new Exception("DataConnectionString is null! Proveri Web.config.");
+                }
+                var storageAccount = CloudStorageAccount.Parse(setting);
+
                 // create blob container for images
                 CloudBlobClient blobStorage = storageAccount.CreateCloudBlobClient();
-                CloudBlobContainer container = blobStorage.GetContainerReference("ProfilePhoto");
+                CloudBlobContainer container = blobStorage.GetContainerReference("profilephoto");
                 container.CreateIfNotExists();
                 // configure container for public access
                 var permissions = container.GetPermissions();

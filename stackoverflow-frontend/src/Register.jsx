@@ -13,33 +13,44 @@ function Register() {
 
 
     const handleSubmit = async (e) => {
-        e.preventDefault();
+    e.preventDefault();
 
-        const formData = new FormData();
-        formData.append("firstName", firstName);
-        formData.append("lastName", lastName);
-        formData.append("Gender", gender)
-        formData.append("Country", country)
-        formData.append("City", city)
-        formData.append("Address", address)
-        formData.append("Email", email)
-        formData.append("Password", password)
-        if (image) formData.append("Image", image)
-        try {
-      const response = await fetch("http://localhost:61983/api/auth/register", {
-        method: "POST",
-        body: formData,
-      })
+    const formData = new FormData();
+    formData.append("firstName", firstName);
+    formData.append("lastName", lastName);
+    formData.append("Gender", gender);
+    formData.append("Country", country);
+    formData.append("City", city);
+    formData.append("Address", address);
+    formData.append("Email", email);
+    formData.append("Password", password);
+    if (image) formData.append("Image", image);
 
-      if (response.ok) {
-        alert("Registration successful!")
-      } else {
-        alert("Registration failed!")
-      }
+    try {
+        const response = await fetch("http://localhost:61983/api/auth/register", {
+            method: "POST",
+            body: formData,
+        });
+
+        // Ako server vrati grešku (npr. 500 ili 400)
+        if (!response.ok) {
+            const errorText = await response.text(); // pročitaj telo odgovora
+            console.error("Server returned an error:", errorText);
+            alert("Registration failed: " + errorText);
+            return;
+        }
+
+        // Ako je sve ok
+        const successText = await response.text();
+        alert("Registration successful: " + successText);
+
     } catch (error) {
-      console.error("Error during registration:", error)
+        console.error("Error during registration:", error);
+        alert("Error during registration: " + error.message);
     }
-  }
+};
+
+  
 
 return (
     <div className="register-container">

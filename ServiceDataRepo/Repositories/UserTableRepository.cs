@@ -13,13 +13,5 @@ namespace ServiceDataRepo.Repositories
     {
         public UserTableRepository() : base("UsersTable") {}
 
-        public UserEntity GetUserByUsername(string username)
-        {
-            var usernameFilter = TableQuery.GenerateFilterCondition("Username", QueryComparisons.Equal, username);
-            var query = new TableQuery<UserEntity>().Where(usernameFilter);
-
-            var results = _table.ExecuteQuery(query);
-            return results.FirstOrDefault();
-        }
     }
 }

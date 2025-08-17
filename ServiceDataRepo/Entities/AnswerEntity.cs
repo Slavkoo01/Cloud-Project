@@ -25,7 +25,7 @@ namespace ServiceDataRepo.Entities
 
         public string QuestionId { get; set; }
         public string UserId { get; set; }
-        public string Content { get; set; }
+        public string Text { get; set; }
         public int VoteCount { get; set; }
         public bool IsAccepted { get; set; }
         public DateTime CreatedAt { get; set; }

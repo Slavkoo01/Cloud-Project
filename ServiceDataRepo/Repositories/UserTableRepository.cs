@@ -13,5 +13,11 @@ namespace ServiceDataRepo.Repositories
     {
         public UserTableRepository() : base("UsersTable") {}
 
+        public void AddUser(UserEntity newUser)
+        {
+            TableOperation insertOperation = TableOperation.Insert(newUser);
+            _table.Execute(insertOperation);
+        }
+
     }
 }

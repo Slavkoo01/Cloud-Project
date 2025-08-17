@@ -1,10 +1,15 @@
 ﻿
 using Microsoft.Azure;
+using Microsoft.WindowsAzure.Storage;
 using ServiceDataRepo.Entities;
 using ServiceDataRepo.Repositories;
+using StackOverflowService.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography.X509Certificates;
+using System.Web;
 using System.Web.Http;
 
 namespace YourNamespace.Controllers
@@ -16,10 +21,13 @@ namespace YourNamespace.Controllers
 
         public AuthController() { }
 
+
+        /*
         [HttpPost]
         [Route("register")]
         public IHttpActionResult Register(UserEntity req)
         {
+            var httpRequest = HttpContext.Current.Request;
 
             if (req == null)
             {
@@ -70,6 +78,81 @@ namespace YourNamespace.Controllers
 
             return Ok("User registered successfully");
         }
+        */
+
+        [HttpPost]
+        [Route("register")]
+        public IHttpActionResult Register()
+        {
+            var httpRequest = HttpContext.Current.Request;
+
+            // Podaci iz forme
+            var firstName = httpRequest.Form["firstName"];
+            var lastName = httpRequest.Form["lastName"];
+            var gender = httpRequest.Form["Gender"];
+            var country = httpRequest.Form["Country"];
+            var city = httpRequest.Form["City"];
+            var address = httpRequest.Form["Address"];
+            var email = httpRequest.Form["Email"];
+            var password = httpRequest.Form["Password"];
+
+            // Slika
+         
+             var file = httpRequest.Files["Image"];
+            
+            string imageUrl = null;
+
+            if (file != null && file.ContentLength > 0)
+            {
+                var storageAccount = CloudStorageAccount.Parse(
+                    CloudConfigurationManager.GetSetting("DataConnectionString")
+                );
+                var blobClient = storageAccount.CreateCloudBlobClient();
+                var container = blobClient.GetContainerReference("ProfilePhoto");
+
+                // Sada sinhrono kreiramo container ako ne postoji
+                container.CreateIfNotExists();
+
+                var blobName = Guid.NewGuid().ToString() + System.IO.Path.GetExtension(file.FileName);
+                var blockBlob = container.GetBlockBlobReference(blobName);
+
+                // Upload fajla sinhrono
+                blockBlob.UploadFromStream(file.InputStream);
+
+                imageUrl = blockBlob.Uri.ToString();
+            }
+
+            string salt = Guid.NewGuid().ToString();
+            string hashedPassword = PasswordHelper.HashPassword(password, salt);
+
+
+            // Napravi korisnika
+            var user = new UserEntity(email)
+            {
+                Name = firstName,
+                LastName = lastName,
+                Gender = gender,
+                Country = country,
+                City = city,
+                Address = address,
+                Email = email,
+                Password = hashedPassword, 
+                ImageUrl = imageUrl
+            };
+
+            try
+            {
+                usersRepo.Insert(user);
+
+            }
+            catch (Exception ex)
+            {
+                return Content(HttpStatusCode.InternalServerError, "Error while registering user: ERROR::: " + ex.Message);
+            }
+            return Ok("User registered successfully");
+        }
+
+
 
         [HttpPost]
         [Route("login")]

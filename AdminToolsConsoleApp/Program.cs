@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
 using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,30 +27,58 @@ namespace AdminToolsConsoleApp
         {
             List<AlertEmailEntity> emails = proxy.RetrieveAllAlertEmails();
             int num = 0;
-            foreach(AlertEmailEntity email in emails)
+            foreach (AlertEmailEntity email in emails)
             {
                 num++;
                 Console.WriteLine($"{num}: {email.Email}");
             }
         }
-
         private static void AddAlertEmail()
         {
-            // srediti poslije da provjerava je li validan format unosa
-            Console.WriteLine("Enter email: ");
-            AlertEmailEntity newEmail = new AlertEmailEntity(Console.ReadLine());
-            proxy.AddAlertEmail(newEmail);
+            Console.Write("Enter email: ");
+            string input = Console.ReadLine();
+
+            if (IsValidEmail(input))
+            {
+                AlertEmailEntity newEmail = new AlertEmailEntity(input);
+                proxy.AddAlertEmail(newEmail);
+                Console.WriteLine("Email added successfully.");
+            }
+            else
+            {
+                Console.WriteLine("Invalid email format. Please try again.");
+            }
+        }
+        private static bool IsValidEmail(string email)
+        {
+            try
+            {
+                var mail = new MailAddress(email);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
         private static void UpdateAlertEmail()
         {
-            // i ovdje poslije provjera unosa
             Console.WriteLine("Enter email to update: ");
             string emailToUpdate = Console.ReadLine();
-            
-            Console.WriteLine("Enter update email: ");
-            AlertEmailEntity updateEmail = new AlertEmailEntity(Console.ReadLine());
 
-            proxy.UpdateAlertEmail(emailToUpdate, updateEmail);
+            Console.WriteLine("Enter update email: ");
+            string input = Console.ReadLine();
+
+            if (IsValidEmail(input))
+            {
+                AlertEmailEntity updateEmail = new AlertEmailEntity(input);
+                proxy.UpdateAlertEmail(emailToUpdate, updateEmail);
+                Console.WriteLine("Email successfully updated.");
+            }
+            else
+            {
+                Console.WriteLine("Invalid email format. Please try again.");
+            }
         }
 
         private static void RemoveAlertEmail()
@@ -65,7 +94,7 @@ namespace AdminToolsConsoleApp
             AlertEmailDataRepo alertEmailRepo1 = new AlertEmailDataRepo();
             Connect();
             bool exit = true;
-            
+
             while (exit)
             {
                 Console.WriteLine("---------- Options:");
@@ -74,7 +103,7 @@ namespace AdminToolsConsoleApp
                 Console.WriteLine("3. Update email");
                 Console.WriteLine("4. Remove email");
                 Console.WriteLine("5. Exit");
-                
+
                 Console.Write("Choice: ");
 
                 var choice = Console.ReadLine();

@@ -44,6 +44,9 @@
     </ConfigurationSettings>
     <Endpoints>
       <InputEndpoint name="Endpoint1" protocol="http" port="80" />
+	  <!--DODANO za internal endpoint-->
+	  <InternalEndpoint name="health-monitoring" protocol="tcp" /> 
+	  <!---->
     </Endpoints>
   </WebRole>
 </ServiceDefinition>

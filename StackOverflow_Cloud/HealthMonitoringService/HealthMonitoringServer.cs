@@ -17,7 +17,7 @@ namespace HealthMonitoringService
     {
         private ServiceHost serviceHost;
         private string externalEndpointName = "HMonitor"; // endpoint za admin konzolu
-        private string notificationInternalEndpointName = "health-monitoring"; // endpoint NotificationService
+        private string internalEndpointName = "health-monitoring"; // endpoint NotificationService i StackOverFlowService
         private Timer timer;
 
         public HealthMonitoringServer()
@@ -28,7 +28,7 @@ namespace HealthMonitoringService
             NetTcpBinding binding = new NetTcpBinding();
             serviceHost.AddServiceEndpoint(typeof(IHealthMonitoring), binding, endpoint);
 
-            timer = new Timer(4000);
+            timer = new Timer(30000); //prepraviti na 4000
             timer.Elapsed += Timer_Elapsed;
             timer.AutoReset = true;
             timer.Start();
@@ -38,40 +38,40 @@ namespace HealthMonitoringService
         {
             try
             {
-                // Ovdje dodati i za dr servis healthCheck 
-                // defff srediti kod
-
-                // Prolazi kroz sve instance NotificationService
-                foreach (var instance in RoleEnvironment.Roles["NotificationService"].Instances)
-                {
-                    var endpoint = instance.InstanceEndpoints[notificationInternalEndpointName];
-                    string address = String.Format("net.tcp://{0}/{1}", endpoint.IPEndpoint, notificationInternalEndpointName);
-                    try
-                    {
-                        var factory = new ChannelFactory<INotificationService>(new NetTcpBinding(), new EndpointAddress(address));
-                        var proxy = factory.CreateChannel();
-
-                        bool isAlive = proxy.HealthCheck();
-                        if (isAlive)
-                            Trace.TraceInformation($"NotificationService instance {instance.Id} OK.");
-                        else
-                        {
-                            FailedHealthCheck("NotificationService");
-                            Trace.TraceWarning($"NotificationService instance {instance.Id} NOT OK!");
-                        }
-                        HealthCheckLog("NotificationService", isAlive ? "OK" : "NOT_OK");
-
-                    }
-                    catch (Exception exInstance)
-                    {
-                        Trace.TraceError($"Error connecting to NotificationService instance {instance.Id}: {exInstance.Message}");
-                    }
-
-                }
+                HealthCheck("NotificationService");
+                HealthCheck("StackOverflowService");
             }
             catch (Exception ex)
             {
                 Trace.TraceError($"HealthMonitoringServer error: {ex.Message}");
+            }
+        }
+
+        private void HealthCheck(string serviceName)
+        {
+            foreach (var instance in RoleEnvironment.Roles[serviceName].Instances)
+            {
+                var endpoint = instance.InstanceEndpoints[internalEndpointName];
+                string address = String.Format("net.tcp://{0}/{1}", endpoint.IPEndpoint, internalEndpointName);
+                try
+                {
+                    var factory = new ChannelFactory<IServiceHealthCheck>(new NetTcpBinding(), new EndpointAddress(address));
+                    var proxy = factory.CreateChannel();
+                    proxy.HealthCheck();
+
+                    Trace.TraceInformation($"{serviceName} instance {instance.Id} OK.");
+                    HealthCheckLog(serviceName, "OK");
+                }
+                catch (EndpointNotFoundException ex)
+                {
+                    HealthCheckLog(serviceName, "NOT_OK");
+                    FailedHealthCheck(serviceName);
+                    Trace.TraceWarning($"{serviceName} instance {instance.Id} NOT OK! {ex.Message}");
+                }
+                catch (Exception exInstance)
+                {
+                    Trace.TraceError($"Error connecting to {serviceName} instance {instance.Id}: {exInstance.Message}");
+                }
             }
         }
 
@@ -105,7 +105,6 @@ namespace HealthMonitoringService
             }
             */
         }
-
         public void Open()
         {
             try
@@ -118,7 +117,6 @@ namespace HealthMonitoringService
                 Trace.TraceError($"Host open error for {externalEndpointName}. Error: {e.Message}");
             }
         }
-
         public void Close()
         {
             try

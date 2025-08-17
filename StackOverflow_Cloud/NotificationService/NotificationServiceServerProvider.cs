@@ -19,10 +19,8 @@ namespace NotificationService
         public void LogNotification(NotificationLogEntity notificationLog)
         {
         }
-        public bool HealthCheck()
-        {
-            return true;
-        }
+        
+        public void HealthCheck() {}
     }
 
 }

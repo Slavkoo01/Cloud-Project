@@ -75,13 +75,26 @@ namespace YourNamespace.Controllers
         [Route("login")]
         public IHttpActionResult Login(UserEntity req)
         {
-            var user = usersRepo.GetAll().ToList().FirstOrDefault(u => u.Email == req.Email && u.Password == req.Password);
+            var user = usersRepo.GetAll().ToList()
+                .FirstOrDefault(u => u.Email == req.Email && u.Password == req.Password);
+
             if (user == null)
             {
-                return Content(HttpStatusCode.Unauthorized, "Invalid credentials");
+                return Content(HttpStatusCode.Unauthorized, new { message = "Invalid credentials" });
             }
 
-            return Ok($"Welcome {user}");
+            return Ok(new
+            {
+                Name = user.Name,
+                LastName = user.LastName,
+                Gender = user.Gender,
+                Country = user.Country,
+                City = user.City,
+                Address = user.Address,
+                Email = user.Email,
+                ProfileImageUrl = user.ProfileImageUrl
+
+            });
         }
     }
 }

@@ -56,10 +56,11 @@ namespace HealthMonitoringService
                             Trace.TraceInformation($"NotificationService instance {instance.Id} OK.");
                         else
                         {
-                            FailedHealthCheck("NotificationService");
+                            //too many emails for now
+                            //FailedHealthCheck("NotificationService");
                             Trace.TraceWarning($"NotificationService instance {instance.Id} NOT OK!");
                         }
-                        HealthCheckLog("NotificationService", isAlive ? "OK" : "NOT_OK");
+                        //HealthCheckLog("NotificationService", isAlive ? "OK" : "NOT_OK");
 
                     }
                     catch (Exception exInstance)

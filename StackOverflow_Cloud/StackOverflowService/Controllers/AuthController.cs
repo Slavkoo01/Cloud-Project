@@ -1,15 +1,10 @@
 ﻿
 using Microsoft.Azure;
-using Microsoft.WindowsAzure.Storage;
 using ServiceDataRepo.Entities;
 using ServiceDataRepo.Repositories;
-using StackOverflowService.Helpers;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Security.Cryptography.X509Certificates;
-using System.Web;
 using System.Web.Http;
 
 namespace YourNamespace.Controllers
@@ -21,13 +16,10 @@ namespace YourNamespace.Controllers
 
         public AuthController() { }
 
-
-        /*
         [HttpPost]
         [Route("register")]
         public IHttpActionResult Register(UserEntity req)
         {
-            var httpRequest = HttpContext.Current.Request;
 
             if (req == null)
             {
@@ -78,107 +70,6 @@ namespace YourNamespace.Controllers
 
             return Ok("User registered successfully");
         }
-        */
-
-        [HttpPost]
-        [Route("register")]
-        public IHttpActionResult Register()
-        {
-            var httpRequest = HttpContext.Current.Request;
-
-            try
-            {
-                // 1️⃣ Validacija form polja
-                var firstName = httpRequest.Form["firstName"];
-                var lastName = httpRequest.Form["lastName"];
-                var gender = httpRequest.Form["Gender"];
-                var country = httpRequest.Form["Country"];
-                var city = httpRequest.Form["City"];
-                var address = httpRequest.Form["Address"];
-                var email = httpRequest.Form["Email"];
-                var password = httpRequest.Form["Password"];
-
-                var missingFields = new List<string>();
-                if (string.IsNullOrWhiteSpace(firstName)) missingFields.Add(nameof(firstName));
-                if (string.IsNullOrWhiteSpace(lastName)) missingFields.Add(nameof(lastName));
-                if (string.IsNullOrWhiteSpace(gender)) missingFields.Add(nameof(gender));
-                if (string.IsNullOrWhiteSpace(country)) missingFields.Add(nameof(country));
-                if (string.IsNullOrWhiteSpace(city)) missingFields.Add(nameof(city));
-                if (string.IsNullOrWhiteSpace(address)) missingFields.Add(nameof(address));
-                if (string.IsNullOrWhiteSpace(email)) missingFields.Add(nameof(email));
-                if (string.IsNullOrWhiteSpace(password)) missingFields.Add(nameof(password));
-
-                if (missingFields.Any())
-                {
-                    return BadRequest("Missing required fields: " + string.Join(", ", missingFields));
-                }
-
-                string imageUrl = null;
-                try
-                {
-                    var file = httpRequest.Files["Image"];
-                    if (file != null && file.ContentLength > 0)
-                    {
-                        var storageAccount = CloudStorageAccount.Parse(
-                            CloudConfigurationManager.GetSetting("DataConnectionString")
-                        );
-                        var blobClient = storageAccount.CreateCloudBlobClient();
-                        var container = blobClient.GetContainerReference("profilephoto");
-                        container.CreateIfNotExists();
-
-                        var blobName = Guid.NewGuid().ToString() + System.IO.Path.GetExtension(file.FileName);
-                        var blockBlob = container.GetBlockBlobReference(blobName);
-                        blockBlob.UploadFromStream(file.InputStream);
-                        imageUrl = blockBlob.Uri.ToString();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    return Content(HttpStatusCode.InternalServerError, "Error uploading image: " + ex.Message);
-                }
-
-                string hashedPassword;
-                try
-                {
-                    string salt = Guid.NewGuid().ToString();
-                    hashedPassword = PasswordHelper.HashPassword(password, salt);
-                }
-                catch (Exception ex)
-                {
-                    return Content(HttpStatusCode.InternalServerError, "Error hashing password: " + ex.Message);
-                }
-
-                var user = new UserEntity(email)
-                {
-                    Name = firstName,
-                    LastName = lastName,
-                    Gender = gender,
-                    Country = country,
-                    City = city,
-                    Address = address,
-                    Email = email,
-                    Password = hashedPassword,
-                    ImageUrl = imageUrl
-                };
-
-                try
-                {
-                    usersRepo.Insert(user);
-                }
-                catch (Exception ex)
-                {
-                    return Content(HttpStatusCode.InternalServerError, "Error inserting user: " + ex.Message);
-                }
-
-                return Ok("User registered successfully");
-            }
-            catch (Exception ex)
-            {
-                return Content(HttpStatusCode.InternalServerError, "Unexpected error: " + ex.Message);
-            }
-        }
-
-
 
         [HttpPost]
         [Route("login")]

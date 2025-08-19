@@ -44,7 +44,7 @@ namespace NotificationService
 
                     // sta raditi sa por
                     SendAlertEmails(message.AsString).GetAwaiter().GetResult();
-                    queue.DeleteMessage(message);
+                    //queue.DeleteMessage(message);
                     Trace.TraceInformation($"Poruka procesuirana: {message.AsString}", "Information");
                 }
 

@@ -21,6 +21,7 @@ namespace ServiceDataRepo.Repositories
         }
 
 =======
+=======
         public UserEntity GetUserByUsername(string username)
         {
             var usernameFilter = TableQuery.GenerateFilterCondition("Username", QueryComparisons.Equal, username);
@@ -29,6 +30,7 @@ namespace ServiceDataRepo.Repositories
             var results = _table.ExecuteQuery(query);
             return results.FirstOrDefault();
         }
+<<<<<<< HEAD
 >>>>>>> parent of e21588f (featControllers)
     }
 }

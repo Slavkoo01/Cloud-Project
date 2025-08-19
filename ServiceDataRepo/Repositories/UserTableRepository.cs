@@ -13,11 +13,22 @@ namespace ServiceDataRepo.Repositories
     {
         public UserTableRepository() : base("UsersTable") {}
 
+<<<<<<< HEAD
         public void AddUser(UserEntity newUser)
         {
             TableOperation insertOperation = TableOperation.Insert(newUser);
             _table.Execute(insertOperation);
         }
 
+=======
+        public UserEntity GetUserByUsername(string username)
+        {
+            var usernameFilter = TableQuery.GenerateFilterCondition("Username", QueryComparisons.Equal, username);
+            var query = new TableQuery<UserEntity>().Where(usernameFilter);
+
+            var results = _table.ExecuteQuery(query);
+            return results.FirstOrDefault();
+        }
+>>>>>>> parent of e21588f (featControllers)
     }
 }

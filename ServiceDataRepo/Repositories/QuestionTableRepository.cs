@@ -10,6 +10,6 @@ namespace ServiceDataRepo.Repositories
 {
     public class QuestionTableRepository : BaseRepository<QuestionEntity>
     {
-        public QuestionTableRepository() : base("QuestionsTable") { }
+        QuestionTableRepository() : base("QuestionsTable") { }
     }
 }

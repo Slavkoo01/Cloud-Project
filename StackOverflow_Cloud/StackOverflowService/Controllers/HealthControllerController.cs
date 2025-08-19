@@ -7,7 +7,8 @@ using System.Web.Http;
 
 namespace StackOverflowService.Controllers
 {
-    public class AnswerController : ApiController
+    [RoutePrefix("api/auth")]
+    public class HealthControllerController : ApiController
     {
     }
 }

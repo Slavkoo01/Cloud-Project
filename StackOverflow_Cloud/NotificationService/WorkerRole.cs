@@ -44,6 +44,7 @@ namespace NotificationService
 
                     // sta raditi sa por
                     SendAlertEmails(message.AsString).GetAwaiter().GetResult();
+                    queue.DeleteMessage(message);
                     Trace.TraceInformation($"Poruka procesuirana: {message.AsString}", "Information");
                 }
 
@@ -106,24 +107,18 @@ namespace NotificationService
                 body = parts[2].Split(new char[] { ':' }, 2)[1].Trim();
             }
 
-            try
+            using (var smtp = new SmtpClient(smtpHost, smtpPort))
             {
-                using (var smtp = new SmtpClient(smtpHost, smtpPort))
-                {
-                    smtp.Credentials = new NetworkCredential(smtpUsername, smtpPassword);
-                    smtp.EnableSsl = true;
+                smtp.Credentials = new NetworkCredential(smtpUsername, smtpPassword);
+                smtp.EnableSsl = true;
 
-                    var email = new MailMessage(smtpUsername, alertEmail, subject, body);
-                    email.IsBodyHtml = true;
+                var email = new MailMessage(smtpUsername, alertEmail, subject, body);
+                email.IsBodyHtml = true;
 
-                    await smtp.SendMailAsync(email);
-                }
-            }
-            catch (Exception e)
-            {
-                Trace.TraceInformation($"Greska: {e}");
+                await smtp.SendMailAsync(email);
             }
         }
+
         private async Task RunAsync(CancellationToken cancellationToken)
         {
             // TODO: Replace the following with your own logic.

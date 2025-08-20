@@ -10,7 +10,7 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    
     try {
       const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/login`, {
         Email: email,
@@ -19,6 +19,7 @@ export default function Login() {
 
       localStorage.setItem("user", JSON.stringify(res.data));
       navigate("/");
+      window.location.reload();
     } catch (err) {
       console.error(err);
       setError("Login failed! Check credentials!");

@@ -14,7 +14,7 @@ namespace ServiceDataRepo.BlobRepositories
         private string containerName = "images";
         public ImageBlobStorageRepository()
         {
-            var blobServiceClient = new BlobServiceClient(connectionString);
+            var blobServiceClient = new BlobServiceClient("UseDevelopmentStorage=true");
             _containerClient = blobServiceClient.GetBlobContainerClient(containerName);
             _containerClient.CreateIfNotExists(PublicAccessType.Blob); // publicly acessable via URL
         }

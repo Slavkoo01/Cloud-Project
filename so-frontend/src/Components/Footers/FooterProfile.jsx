@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="shadow-lg relative w-full ">
+    <footer className="shadow-lg absolute bottom-0 w-full ">
       {/* Triangle topper */}
       <div
         aria-hidden="true"

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import SearchBar from "../../Components/SearchBars/SearchBar";
 import DropDownNavbar from "../../Components/DropDowns/DropDownNavbar";
+import SearchBar from "../SearchBars/SearchBar";
 
 export default function Navbar() {
   const [isDropDownOpen, setIsDropDownOpen] = useState(false);

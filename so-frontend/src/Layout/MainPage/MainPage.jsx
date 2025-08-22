@@ -11,7 +11,7 @@ export default function MainPage() {
       <div className="min-h-screen flex bg-linear-to-b from-cyan-400 to-blue-500">
         <div className="flex-col w-full ">
           <div className="flex items-center justify-center mt-3 mb-5">
-          <Navbar ></Navbar>
+          <Navbar />
           </div>
           <div className="flex items-center justify-center my-5">
           <MainCard> 
@@ -25,8 +25,7 @@ export default function MainPage() {
           </div>
         </div>
       </div>
-      <Footer></Footer>
-
+      <Footer/>
     </>
   );
 }

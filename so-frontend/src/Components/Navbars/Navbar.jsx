@@ -2,10 +2,11 @@ import React, { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import DropDownNavbar from "../../Components/DropDowns/DropDownNavbar";
 import SearchBar from "../SearchBars/SearchBar";
+import FormAskQuestion from "../Forms/FormAskQuestion"
 
 export default function Navbar() {
   const [isDropDownOpen, setIsDropDownOpen] = useState(false);
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const storedUser = localStorage.getItem("user");
   const user = storedUser ? JSON.parse(storedUser) : null;
 
@@ -47,12 +48,14 @@ export default function Navbar() {
 
       {/* Right side - Auth / User */}
       <div className="flex items-center space-x-4">
-        <Link
-          to="/ask"
+        <button
+          onClick={()=>setIsModalOpen(true)}
+          
           className="px-4 py-2 rounded-lg font-medium text-white bg-green-600 hover:bg-green-400 shadow"
-        >
+        > 
           Ask Question
-        </Link>
+        </button>
+        <FormAskQuestion isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}/>
 
         <div ref={dropdownRef} className="relative">
           <button

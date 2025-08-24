@@ -92,6 +92,7 @@ namespace YourNamespace.Controllers
                 City = user.City,
                 Address = user.Address,
                 Email = user.Email,
+                Username = user.Username,
                 ProfileImageUrl = user.ProfileImageUrl
 
             });

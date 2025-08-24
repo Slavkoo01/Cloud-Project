@@ -12,15 +12,15 @@ namespace ServiceDataRepo.Entities
     {
         public QuestionEntity() { }
 
-        public QuestionEntity(string userId)
+        public QuestionEntity(string username)
         {
             PartitionKey = "Question";
             RowKey = Guid.NewGuid().ToString();
-            UserId = userId;
+            Username = username;
             CreatedAt = DateTime.UtcNow;
         }
 
-        public string UserId { get; set; }
+        public string Username { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public string ImageUrl { get; set; }

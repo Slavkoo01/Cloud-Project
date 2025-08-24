@@ -31,9 +31,9 @@ export default function EditProfileModal({ isOpen, onClose }) {
         ProfileImageUrl: storedUser.ProfileImageUrl || ""
       });
       setImagePreview(storedUser.ProfileImageUrl || "");
-      setFile(null); // reset file when modal opens
+      setFile(null);
     }
-  }, [isOpen]); // ✅ depends only on modal open
+  }, [isOpen]); 
 
   if (!isOpen) return null;
 
@@ -46,7 +46,7 @@ export default function EditProfileModal({ isOpen, onClose }) {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       setFile(selectedFile);
-      setImagePreview(URL.createObjectURL(selectedFile)); // ✅ preview now works
+      setImagePreview(URL.createObjectURL(selectedFile)); 
     }
   };
 

@@ -41,7 +41,7 @@ export default function EditProfileModal({ isOpen, onClose }) {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
-
+ 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {

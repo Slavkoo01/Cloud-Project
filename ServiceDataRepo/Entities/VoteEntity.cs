@@ -11,16 +11,16 @@ namespace ServiceDataRepo.Entities
     {
         public VoteEntity() { }
 
-        public VoteEntity(string answerId, string userId, int value)
+        public VoteEntity(string answerId, string username, int value)
         {
             PartitionKey = answerId;  // Group all votes by answer
-            RowKey = userId;          // one vote per user per answer (in case of multiple it should just overwrite it or be exception which might be a problem :)) )
+            RowKey = username;          // one vote per user per answer (in case of multiple it should just overwrite it or be exception which might be a problem :)) )
             AnswerId = answerId;
-            UserId = userId;
+            Username = username;
             Value = value;        
         }
 
-        public string UserId { get; set; }
+        public string Username { get; set; }
 
         public string AnswerId { get; set; }
 

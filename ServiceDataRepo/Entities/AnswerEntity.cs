@@ -12,19 +12,19 @@ namespace ServiceDataRepo.Entities
     {
         public AnswerEntity() { }
 
-        public AnswerEntity(string questionId, string userId)
+        public AnswerEntity(string questionId, string username)
         {
             PartitionKey = questionId; //To Group answeres by the question (it made sense idk like pull everything from the same partition)
             RowKey = Guid.NewGuid().ToString();
             QuestionId = questionId;
-            UserId = userId;
+            Username = username;
             CreatedAt = DateTime.UtcNow;
             VoteCount = 0;
             IsAccepted = false;
         }
 
         public string QuestionId { get; set; }
-        public string UserId { get; set; }
+        public string Username { get; set; }
         public string Text { get; set; }
         public int VoteCount { get; set; }
         public bool IsAccepted { get; set; }

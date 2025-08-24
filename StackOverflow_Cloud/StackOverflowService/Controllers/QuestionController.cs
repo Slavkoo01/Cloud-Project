@@ -3,6 +3,7 @@ using Microsoft.WindowsAzure.Storage;
 using ServiceDataRepo.BlobRepositories;
 using ServiceDataRepo.Entities;
 using ServiceDataRepo.Repositories;
+using StackOverflowService.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,22 +21,94 @@ namespace StackOverflowService.Controllers
         private readonly QuestionTableRepository questionRepo = new QuestionTableRepository();
         private readonly ImageBlobStorageRepository blobContainer = new ImageBlobStorageRepository();
         private readonly UserTableRepository usersRepo = new UserTableRepository();
+        private readonly VoteTableRepository voteRepo = new VoteTableRepository();
+        private readonly AnswerTableRepository answerRepo = new AnswerTableRepository();
+
         [HttpGet]
         [Route("")]
-        public IHttpActionResult GetAll(string search = null)
+        public IHttpActionResult GetAll(string search = null, string loggedInUserId = null)
         {
             var questions = questionRepo.GetAll().ToList();
 
+            // Optional search
             if (!string.IsNullOrEmpty(search))
             {
                 questions = questions
                     .Where(q => q.Title != null && q.Title.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0)
                     .ToList();
             }
+
+            // Order newest first
             questions = questions.OrderByDescending(q => q.CreatedAt).ToList();
 
-            return Ok(questions);
+            var questionDtos = new List<QuestionDto>();
+
+            foreach (var q in questions)
+            {
+                // Get user who posted question
+                var user = usersRepo.GetById("User", q.Username);
+
+                // Build Question DTO
+                var qDto = new QuestionDto
+                {
+                    Id = q.RowKey,
+                    Title = q.Title,
+                    Decription = q.Description,
+                    ImageUrl = q.ImageUrl,
+                    CreatedAt = q.CreatedAt,
+                    User = user == null ? null : new UserDto
+                    {
+                        Username = user.Username,
+                        ProfileImageUrl = user.ProfileImageUrl
+                    },
+                    Answers = new List<AnswerDto>()
+                };
+
+                // Get answers for this question
+                var answers = answerRepo.GetAll(q.RowKey).ToList();
+
+                foreach (var a in answers)
+                {
+                    var aUser = usersRepo.GetById("User", a.Username);
+
+                    // Count votes for this answer
+                    var votes = voteRepo.GetAll(a.RowKey).ToList();
+                    int voteCount = votes.Sum(v => v.Value); 
+
+                    // Has the logged-in user voted?
+                    int userVote = 0;
+                    if (!string.IsNullOrEmpty(loggedInUserId))
+                    {
+                        var userVoteEntity = votes.FirstOrDefault(v => v.Username == loggedInUserId);
+                        if (userVoteEntity != null)
+                            userVote = userVoteEntity.Value; // 1, -1
+                    }
+
+                    // Build Answer DTO
+                    var aDto = new AnswerDto
+                    {
+                        Id = a.RowKey,
+                        Text = a.Text,
+                        CreatedAt = a.CreatedAt,
+                        Votes = voteCount,
+                        UserVote = userVote,
+                        IsAccepted = a.IsAccepted,
+                        User = aUser == null ? null : new UserDto
+                        {
+                            Username = aUser.Username,
+                            ProfileImageUrl = aUser.ProfileImageUrl
+                        }
+                    };
+
+                    qDto.Answers.Add(aDto);
+                }
+
+                questionDtos.Add(qDto);
+            }
+
+            return Ok(questionDtos);
         }
+
 
 
         [HttpGet]

@@ -61,7 +61,7 @@ namespace StackOverflowService.Controllers
                 {
                     Id = q.RowKey,
                     Title = q.Title,
-                    Decription = q.Description,
+                    Description = q.Description,
                     ImageUrl = q.ImageUrl,
                     IsThemeOpen = q.IsThemeOpen,
                     CreatedAt = q.CreatedAt,

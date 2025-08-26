@@ -29,7 +29,7 @@ export default function QuestionList({ searchQuery, onlyMine }) {
     useEffect(() => {
         setLoading(true); // show loading state for new searches
         axios.get(`${import.meta.env.VITE_API_URL}/questions`, {
-            params: { search: searchQuery, LoggedInUser: storedUser.Username, onlyMine : onlyMine }
+            params: { search: searchQuery, LoggedInUser: storedUser.Username, onlyMine: onlyMine }
         })
             .then((res) => {
                 console.log("data: ", res.data);
@@ -234,7 +234,7 @@ export default function QuestionList({ searchQuery, onlyMine }) {
 
                         {/* Question Title + Body */}
                         <h2 className="text-xl font-bold mb-2">{q.Title || "Untitled"}</h2>
-                        <p className="text-gray-700 mb-2">{q.Decription || ""}</p>
+                        <p className="text-gray-700 mb-2">{q.Description || ""}</p>
                         {q.ImageUrl && (
                             <div className="h-65">
                                 <img
@@ -406,12 +406,7 @@ export default function QuestionList({ searchQuery, onlyMine }) {
                         setQuestions((prev) =>
                             prev.map((q) =>
                                 q.Id === updatedQuestion.Id
-                                    ? {
-                                        ...q,
-                                        Title: updatedQuestion.Title,
-                                        Description: updatedQuestion.Description,
-                                        ImageUrl: updatedQuestion.ImageUrl
-                                    }
+                                    ? { ...q, ...updatedQuestion }
                                     : q
                             )
                         );
@@ -419,6 +414,7 @@ export default function QuestionList({ searchQuery, onlyMine }) {
                 }}
                 question={selectedQuestion}
             />
+
 
 
 

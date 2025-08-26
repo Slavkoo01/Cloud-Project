@@ -13,12 +13,12 @@ export default function EditQuestionModal({ isOpen, onClose, question }) {
     useEffect(() => {
         if (question) {
             setForm({
-           Title: question.Title || "",
-           Description: question.Description || "",
-           ImageUrl: question.ImageUrl || ""
-       });
-       setImagePreview(question.ImageUrl || "");
-    }
+                Title: question.Title || "",
+                Description: question.Description || "",
+                ImageUrl: question.ImageUrl || ""
+            });
+            setImagePreview(question.ImageUrl || "");
+        }
     }, [question]);
 
     if (!isOpen) return null;
@@ -49,43 +49,44 @@ export default function EditQuestionModal({ isOpen, onClose, question }) {
         setMsg({ type: "", text: "" });
 
         try {
-            // Update question
+            // 1. Update question text fields
             await axios.put(
                 `${import.meta.env.VITE_API_URL}/questions/${question.Id}`,
                 form,
-                {
-                    headers: { "Content-Type": "application/json" },
-                }
+                { headers: { "Content-Type": "application/json" } }
             );
 
-            // Upload new image if selected
+            let finalImageUrl = form.ImageUrl;
+
+            // 2. Upload new image if selected
             if (file) {
                 const formData = new FormData();
                 formData.append("file", file);
 
-               const res = await axios.post(
+                const res = await axios.post(
                     `${import.meta.env.VITE_API_URL}/questions/${question.Id}/upload-picture`,
                     formData,
-                    {
-                        headers: { "Content-Type": "multipart/form-data" },
-                    }
+                    { headers: { "Content-Type": "multipart/form-data" } }
                 );
-                           // update form.ImageUrl with new uploaded URL if backend returns it
-          setForm((prev) => ({ ...prev, ImageUrl: res.data.ImageUrl }));
-          setImagePreview(res.data.ImageUrl);
+
+                finalImageUrl = res.data.ImageUrl;
+                setImagePreview(res.data.ImageUrl);
             }
 
-            setMsg({ type: "success", text: "Question updated successfully!" });
-            setTimeout(() => {
-                onClose({
-                    Id: question.Id,
-                    Title: form.Title,
-                    Description: form.Description,
-                    ImageUrl: form.ImageUrl
-                });
-                setMsg({ type: "", text: "" });
-            }, 1000);
+            // 3. Send back correct updated question object
+            const updatedQuestion = {
+                Id: question.Id,
+                Title: form.Title,
+                Description: form.Description,
+                ImageUrl: finalImageUrl,
+            };
 
+            setMsg({ type: "success", text: "Question updated successfully!" });
+
+            setTimeout(() => {
+                onClose(updatedQuestion);
+                setMsg({ type: "", text: "" });
+            }, 800);
         } catch (err) {
             console.error(err);
             setMsg({ type: "error", text: "Failed to update question" });
@@ -93,6 +94,7 @@ export default function EditQuestionModal({ isOpen, onClose, question }) {
             setSaving(false);
         }
     };
+
 
     const handleOnClose = () => {
         setFile(null);
@@ -108,8 +110,8 @@ export default function EditQuestionModal({ isOpen, onClose, question }) {
                 {msg.text && (
                     <div
                         className={`mb-3 p-2 rounded text-sm font-medium ${msg.type === "success"
-                                ? "bg-emerald-200 text-emerald-600"
-                                : "bg-red-200 text-red-600"
+                            ? "bg-emerald-200 text-emerald-600"
+                            : "bg-red-200 text-red-600"
                             }`}
                     >
                         {msg.text}

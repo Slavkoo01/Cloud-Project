@@ -8,7 +8,7 @@ const DEFAULT_PROFILE_IMG =
   "https://i.pinimg.com/736x/98/1d/6b/981d6b2e0ccb5e968a0618c8d47671da.jpg";
 
 
-export default function Navbar() {
+export default function Navbar({ onSearch }) {
   const [isDropDownOpen, setIsDropDownOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const storedUser = localStorage.getItem("user");
@@ -48,7 +48,7 @@ export default function Navbar() {
       </div>
 
       {/* Middle - Search */}
-      <SearchBar />
+      <SearchBar onSearch={onSearch} />
 
       {/* Right side - Auth / User */}
       <div className="flex items-center space-x-4">

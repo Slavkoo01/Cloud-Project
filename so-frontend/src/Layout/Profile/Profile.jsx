@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Navbar from "../../Components/Navbars/NavbarProfile";
 import Footer from "../../Components/Footers/FooterProfile";
 import FormEditProfile from "../../Components/Forms/FormEditProfile";
+import QuestionList from "../../Views/Feed/Questions";
 
 const DEFAULT_PROFILE_IMG =
   "https://i.pinimg.com/736x/98/1d/6b/981d6b2e0ccb5e968a0618c8d47671da.jpg";
@@ -9,10 +10,12 @@ const DEFAULT_PROFILE_IMG =
 export default function Profile() {
   const user = JSON.parse(localStorage.getItem("user"));
   const [isModalOpen, setModalOpen] = useState(false);
+  const [showMyQuestions, setShowMyQuestions] = useState(false);
+
   return (
     <>
       <Navbar />
-      <main className="profile-page">
+      <main className="profile-page flex-1">
         {/* Banner */}
         <section className="relative block h-[500px]">
           <div
@@ -52,10 +55,7 @@ export default function Profile() {
                     <div className="relative">
                       <img
                         alt="profile"
-                        src={
-                          user?.ProfileImageUrl ||
-                          DEFAULT_PROFILE_IMG
-                        }
+                        src={user?.ProfileImageUrl || DEFAULT_PROFILE_IMG}
                         className="shadow-xl rounded-full h-40 w-40 object-cover border-4 border-white -mt-20"
                       />
                     </div>
@@ -69,9 +69,12 @@ export default function Profile() {
                       >
                         Edit Profile
                       </button>
-                       <FormEditProfile isOpen={isModalOpen} onClose={() => setModalOpen(false)} />
+                      <FormEditProfile
+                        isOpen={isModalOpen}
+                        onClose={() => setModalOpen(false)}
+                      />
                     </div>
-                  </div>                 
+                  </div>
                 </div>
 
                 {/* User info */}
@@ -91,18 +94,39 @@ export default function Profile() {
                     <i className="fas fa-home mr-2"></i>
                     {user?.Address}
                   </div>
+                   
                 </div>
 
-                {/* About section */}
-                <div className="mt-10 py-10 border-t border-gray-200 text-center">
-                  
-                </div>
+                <div className="mt-10 border-t border-gray-200 text-center"></div>
+
+              <div className="flex justify-center items-center my-5">
+                <button
+                        className="my-5 bg-emerald-500 cursor-pointer hover:bg-emerald-600 text-white font-bold px-4 py-2 rounded-md shadow-md transition-all"
+                        type="button"
+                        onClick={() => setShowMyQuestions(!showMyQuestions)}
+                      >
+                        {showMyQuestions ? "Hide My Questions" : "Show My Questions"}
+                      </button>
+              </div>
+                {/* My Questions */}
+                {showMyQuestions && (
+                  <div className="my-10">
+                    <h4 className="text-2xl font-semibold text-gray-700 mb-4">
+                      My Questions
+                    </h4>
+                    <QuestionList onlyMine={true} />
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </section>
       </main>
-      <Footer />
+      <div className="fixed inset-x-0 bottom-0">
+        
+          <Footer />
+        
+      </div>
     </>
   );
 }

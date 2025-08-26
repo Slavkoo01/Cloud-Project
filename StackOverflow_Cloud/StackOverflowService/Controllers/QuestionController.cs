@@ -26,7 +26,7 @@ namespace StackOverflowService.Controllers
 
         [HttpGet]
         [Route("")]
-        public IHttpActionResult GetAll(string search = null, string LoggedInUser = null)
+        public IHttpActionResult GetAll(string search = null, string LoggedInUser = null, bool onlyMine = false)
         {
             var questions = questionRepo.GetAll().ToList();
 
@@ -35,6 +35,14 @@ namespace StackOverflowService.Controllers
             {
                 questions = questions
                     .Where(q => q.Title != null && q.Title.IndexOf(search, StringComparison.OrdinalIgnoreCase) >= 0)
+                    .ToList();
+            }
+
+            // Filter by logged-in user if requested
+            if (onlyMine && !string.IsNullOrEmpty(LoggedInUser))
+            {
+                questions = questions
+                    .Where(q => q.Username.Equals(LoggedInUser, StringComparison.OrdinalIgnoreCase))
                     .ToList();
             }
 
@@ -74,7 +82,7 @@ namespace StackOverflowService.Controllers
 
                     // Count votes for this answer
                     var votes = voteRepo.GetAll(a.RowKey).ToList();
-                    int voteCount = votes.Sum(v => v.Value); 
+                    int voteCount = votes.Sum(v => v.Value);
 
                     // Has the logged-in user voted?
                     int userVote = 0;
@@ -109,6 +117,7 @@ namespace StackOverflowService.Controllers
 
             return Ok(questionDtos);
         }
+
 
 
 
@@ -168,11 +177,29 @@ namespace StackOverflowService.Controllers
 
         [HttpDelete]
         [Route("{id}")]
-        public IHttpActionResult Delete(string id)
+        public async Task<IHttpActionResult> Delete(string id)
         {
             var existing = questionRepo.GetById("Question", id);
             if (existing == null)
                 return NotFound();
+
+            var blobRepo = new ImageBlobStorageRepository();
+
+            // Delete question image if it exists
+            if (!string.IsNullOrEmpty(existing.ImageUrl))
+            {
+                try
+                {
+                    // Assuming ImageUrl is the full URL, extract the blob name
+                    var blobName = Path.GetFileName(existing.ImageUrl);
+                    await blobRepo.DeleteImageAsync(blobName);
+                }
+                catch (Exception ex)
+                {
+                    // Log error but don't prevent deletion
+                    System.Diagnostics.Debug.WriteLine("Failed to delete image from blob: " + ex.Message);
+                }
+            }
 
             // Delete all answers
             var answers = answerRepo.GetAll(id).ToList();
@@ -190,6 +217,7 @@ namespace StackOverflowService.Controllers
 
             return Ok();
         }
+
 
 
         [HttpPost]

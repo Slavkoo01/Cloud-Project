@@ -12,9 +12,13 @@ export default function EditQuestionModal({ isOpen, onClose, question }) {
 
     useEffect(() => {
         if (question) {
-            setForm({ Title: question.Title || "", Description: question.Decription || "" });
-            setImagePreview(question.ImageUrl || "");
-        }
+            setForm({
+           Title: question.Title || "",
+           Description: question.Description || "",
+           ImageUrl: question.ImageUrl || ""
+       });
+       setImagePreview(question.ImageUrl || "");
+    }
     }, [question]);
 
     if (!isOpen) return null;
@@ -36,6 +40,7 @@ export default function EditQuestionModal({ isOpen, onClose, question }) {
         setFile(null);
         setImagePreview("");
         if (fileInputRef.current) fileInputRef.current.value = "";
+        setForm((prev) => ({ ...prev, ImageUrl: "" }));
     };
 
     const handleSubmit = async (e) => {
@@ -58,13 +63,16 @@ export default function EditQuestionModal({ isOpen, onClose, question }) {
                 const formData = new FormData();
                 formData.append("file", file);
 
-                await axios.post(
+               const res = await axios.post(
                     `${import.meta.env.VITE_API_URL}/questions/${question.Id}/upload-picture`,
                     formData,
                     {
                         headers: { "Content-Type": "multipart/form-data" },
                     }
                 );
+                           // update form.ImageUrl with new uploaded URL if backend returns it
+          setForm((prev) => ({ ...prev, ImageUrl: res.data.ImageUrl }));
+          setImagePreview(res.data.ImageUrl);
             }
 
             setMsg({ type: "success", text: "Question updated successfully!" });
@@ -73,7 +81,7 @@ export default function EditQuestionModal({ isOpen, onClose, question }) {
                     Id: question.Id,
                     Title: form.Title,
                     Description: form.Description,
-                    ImageUrl: imagePreview 
+                    ImageUrl: form.ImageUrl
                 });
                 setMsg({ type: "", text: "" });
             }, 1000);

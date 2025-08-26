@@ -111,6 +111,9 @@ namespace StackOverflowService.Controllers
 
             if (existing.IsAccepted)
             {
+                //TODO when answer is accepted it needs to send email to all of the people who answerd before 
+                //you will search all ansers based on question ID and get their email
+
                 // Unaccept
                 existing.IsAccepted = false;
                 question.IsThemeOpen = true;
@@ -124,6 +127,7 @@ namespace StackOverflowService.Controllers
                 question.IsThemeOpen = false;
 
             }
+           
 
             answerRepo.Update(existing);
             questionRepo.Update(question);

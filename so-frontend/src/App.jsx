@@ -4,7 +4,7 @@ import MainPage from "./Layout/MainPage/MainPage";
 import Login from "./Views/Auth/Login";
 import Register from "./Views/Auth/Register";
 import Profile from "./Layout/Profile/Profile";
-import FeedQuestions from "./Views/Feed/Questions"
+
 function App() {
   const user = JSON.parse(localStorage.getItem("user"));
 
@@ -25,10 +25,8 @@ function App() {
           // Authenticated routes
           <>
             <Route path="/" element={<MainPage />}>
-              <Route path="/feed" element={<FeedQuestions/>} />
-              <Route path="*" element={<Navigate to="/feed" replace />} />
-              <Route path="/" element={<Navigate to="/feed" replace />} />
-              
+              <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="/" element={<Navigate to="/" replace />} />
             </Route>
             <Route path="/profile" element={<Profile />} />
             <Route path="*" element={<Navigate to="/" replace />} />

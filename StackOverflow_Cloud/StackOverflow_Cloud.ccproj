@@ -48,12 +48,12 @@
       <RoleName>HealthMonitoringService</RoleName>
       <UpdateDiagnosticsConnectionStringOnPublish>True</UpdateDiagnosticsConnectionStringOnPublish>
     </ProjectReference>
-    <ProjectReference Include="HealthStatusService\HealthStatusService.csproj">
-      <Name>HealthStatusService</Name>
-      <Project>{31644d55-810b-4e17-9c58-040e00e4903c}</Project>
+    <ProjectReference Include="HeathStatusServiceWeb\HeathStatusServiceWeb.csproj">
+      <Name>HeathStatusServiceWeb</Name>
+      <Project>{b15e0f24-0981-488c-aa8e-00e14f2fc84a}</Project>
       <Private>True</Private>
       <RoleType>Web</RoleType>
-      <RoleName>HealthStatusService</RoleName>
+      <RoleName>HeathStatusServiceWeb</RoleName>
       <UpdateDiagnosticsConnectionStringOnPublish>True</UpdateDiagnosticsConnectionStringOnPublish>
     </ProjectReference>
     <ProjectReference Include="NotificationService\NotificationService.csproj">
@@ -76,12 +76,14 @@
   <ItemGroup>
     <Folder Include="HealthMonitoringServiceContent\" />
     <Folder Include="HealthStatusServiceContent\" />
+    <Folder Include="HeathStatusServiceWebContent\" />
     <Folder Include="NotificationServiceContent\" />
     <Folder Include="StackOverflowServiceContent\" />
   </ItemGroup>
   <ItemGroup>
     <DiagnosticsConfiguration Include="HealthMonitoringServiceContent\diagnostics.wadcfgx" />
     <DiagnosticsConfiguration Include="HealthStatusServiceContent\diagnostics.wadcfgx" />
+    <DiagnosticsConfiguration Include="HeathStatusServiceWebContent\diagnostics.wadcfgx" />
     <DiagnosticsConfiguration Include="NotificationServiceContent\diagnostics.wadcfgx" />
     <DiagnosticsConfiguration Include="StackOverflowServiceContent\diagnostics.wadcfgx" />
   </ItemGroup>

@@ -9,8 +9,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotificationService", "Noti
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HealthMonitoringService", "HealthMonitoringService\HealthMonitoringService.csproj", "{8890CEF3-9CA6-44C9-99B7-FC6D139D9EDF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HealthStatusService", "HealthStatusService\HealthStatusService.csproj", "{31644D55-810B-4E17-9C58-040E00E4903C}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts", "..\Contracts\Contracts.csproj", "{7FD06B1A-512E-4339-9945-94F0DC28AF21}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceDataRepo", "..\ServiceDataRepo\ServiceDataRepo.csproj", "{DB2FDEA3-0587-4B12-A51E-12DAEC8CB3B8}"
@@ -18,6 +16,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AdminToolsConsoleApp", "..\AdminToolsConsoleApp\AdminToolsConsoleApp.csproj", "{9CA62107-495A-49F9-AF99-3976353212BB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StackOverflowService", "StackOverflowService\StackOverflowService.csproj", "{935A686F-39FC-4921-9743-5F49E180F50C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HeathStatusServiceWeb", "HeathStatusServiceWeb\HeathStatusServiceWeb.csproj", "{B15E0F24-0981-488C-AA8E-00E14F2FC84A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,10 +37,6 @@ Global
 		{8890CEF3-9CA6-44C9-99B7-FC6D139D9EDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8890CEF3-9CA6-44C9-99B7-FC6D139D9EDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8890CEF3-9CA6-44C9-99B7-FC6D139D9EDF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{31644D55-810B-4E17-9C58-040E00E4903C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{31644D55-810B-4E17-9C58-040E00E4903C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{31644D55-810B-4E17-9C58-040E00E4903C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{31644D55-810B-4E17-9C58-040E00E4903C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7FD06B1A-512E-4339-9945-94F0DC28AF21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7FD06B1A-512E-4339-9945-94F0DC28AF21}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7FD06B1A-512E-4339-9945-94F0DC28AF21}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -57,6 +53,10 @@ Global
 		{935A686F-39FC-4921-9743-5F49E180F50C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{935A686F-39FC-4921-9743-5F49E180F50C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{935A686F-39FC-4921-9743-5F49E180F50C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B15E0F24-0981-488C-AA8E-00E14F2FC84A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B15E0F24-0981-488C-AA8E-00E14F2FC84A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B15E0F24-0981-488C-AA8E-00E14F2FC84A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B15E0F24-0981-488C-AA8E-00E14F2FC84A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -12,17 +12,15 @@
       <Setting name="DataConnectionString" value="UseDevelopmentStorage=true" />
     </ConfigurationSettings>
   </Role>
-  <Role name="HealthStatusService">
-    <Instances count="1" />
-    <ConfigurationSettings>
-      <Setting name="DataConnectionString" value="UseDevelopmentStorage=true" />
-    </ConfigurationSettings>
-  </Role>
   <Role name="StackOverflowService">
     <Instances count="1" />
     <ConfigurationSettings>
       <Setting name="DataConnectionString" value="UseDevelopmentStorage=true" />
     </ConfigurationSettings>
+  </Role>
+  <Role name="HeathStatusServiceWeb">
+    <Instances count="1" />
+    <ConfigurationSettings />
   </Role>
   <NetworkConfiguration>
     <VirtualNetworkSite name="stackoverflow_cloudVNet" />
@@ -48,6 +46,11 @@
         </Subnets>
       </InstanceAddress>
       <InstanceAddress roleName="WebRole1">
+        <Subnets>
+          <Subnet name="WebTier" />
+        </Subnets>
+      </InstanceAddress>
+      <InstanceAddress roleName="HeathStatusServiceWeb">
         <Subnets>
           <Subnet name="WebTier" />
         </Subnets>

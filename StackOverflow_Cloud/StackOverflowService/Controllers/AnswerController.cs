@@ -111,6 +111,23 @@ namespace StackOverflowService.Controllers
 
             if (existing.IsAccepted)
             {
+                var allAnswers = answerRepo.GetAll(questionId).ToList();
+                List<UserEntity> usersToNotify = new List<UserEntity>();
+                foreach (var ans in allAnswers)
+                {
+                    var user = userRepo.GetById("User", ans.Username);
+                    usersToNotify.Add(user);
+                }
+
+                List<string> emails = new List<string>();
+                foreach (var u in usersToNotify)
+                {
+                    if (u != null && !string.IsNullOrEmpty(u.Email) && !emails.Contains(u.Email))
+                        emails.Add(u.Email);
+                }
+
+                string AnswerText = existing.Text;
+
                 //TODO when answer is accepted it needs to send email to all of the people who answerd before 
                 //you will search all ansers based on question ID and get their email
 

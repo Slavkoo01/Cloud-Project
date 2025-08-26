@@ -11,6 +11,8 @@ namespace StackOverflowService.Models
         public string Title { get; set; }
         public string Decription { get; set; }
         public string ImageUrl { get; set; }
+
+        public bool IsThemeOpen { get; set; }
         public UserDto User { get; set; }
         public DateTime CreatedAt { get; set; }
         public List<AnswerDto> Answers { get; set; } = new List<AnswerDto>();

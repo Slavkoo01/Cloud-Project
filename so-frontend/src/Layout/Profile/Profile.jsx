@@ -2,6 +2,10 @@ import React, { useState } from "react";
 import Navbar from "../../Components/Navbars/NavbarProfile";
 import Footer from "../../Components/Footers/FooterProfile";
 import FormEditProfile from "../../Components/Forms/FormEditProfile";
+
+const DEFAULT_PROFILE_IMG =
+  "https://i.pinimg.com/736x/98/1d/6b/981d6b2e0ccb5e968a0618c8d47671da.jpg";
+
 export default function Profile() {
   const user = JSON.parse(localStorage.getItem("user"));
   const [isModalOpen, setModalOpen] = useState(false);
@@ -50,7 +54,7 @@ export default function Profile() {
                         alt="profile"
                         src={
                           user?.ProfileImageUrl ||
-                          "https://i.pinimg.com/736x/98/1d/6b/981d6b2e0ccb5e968a0618c8d47671da.jpg"
+                          DEFAULT_PROFILE_IMG
                         }
                         className="shadow-xl rounded-full h-40 w-40 object-cover border-4 border-white -mt-20"
                       />

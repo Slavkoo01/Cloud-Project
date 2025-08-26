@@ -1,10 +1,12 @@
 ﻿using ServiceDataRepo.Entities;
 using ServiceDataRepo.Repositories;
+using StackOverflowService.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 using System.Web.Http;
 
 namespace StackOverflowService.Controllers
@@ -13,6 +15,9 @@ namespace StackOverflowService.Controllers
     public class AnswerController : ApiController
     {
         private readonly AnswerTableRepository answerRepo = new AnswerTableRepository();
+        private readonly VoteTableRepository voteRepo = new VoteTableRepository();
+        private readonly QuestionTableRepository questionRepo = new QuestionTableRepository();
+        private readonly UserTableRepository userRepo = new UserTableRepository();
 
         [HttpGet]
         [Route("by-question/{questionId}")]
@@ -49,7 +54,12 @@ namespace StackOverflowService.Controllers
 
             existing.Text = req.Text;
             answerRepo.Update(existing);
-            return Ok(existing);
+
+          
+            return Ok(new {
+                Id = existing.RowKey,
+                Text = existing.Text
+            });
         }
 
         [HttpDelete]
@@ -60,24 +70,72 @@ namespace StackOverflowService.Controllers
             if (existing == null)
                 return NotFound();
 
+            
+            var votes = voteRepo.GetAll(answerId).ToList();
+            foreach (var v in votes)
+                voteRepo.Delete(v);
+
+            var question = new QuestionTableRepository().GetById("Question", questionId);
+            // If accepted -> reopen question
+            if (existing.IsAccepted)
+            {
+                if (question != null)
+                {
+                    question.IsThemeOpen = true;
+                    questionRepo.Update(question);
+                }
+            }
+
             answerRepo.Delete(existing);
-            return Ok();
+
+            return Ok(new
+            {
+                IsThemeOpen = question.IsThemeOpen 
+            });
+
         }
 
         [HttpPost]
-        [Route("{questionId}/{answerId}/accept")]
-        public IHttpActionResult AcceptAnswer(string questionId, string answerId)
+        [Route("{questionId}/{answerId}/toggle-accept")]
+        public IHttpActionResult ToggleAccept(string questionId, string answerId)
         {
             var existing = answerRepo.GetById(questionId, answerId);
             if (existing == null)
                 return NotFound();
 
-            existing.IsAccepted = true;
+            // get related question
+            var questionRepo = new QuestionTableRepository();
+            var question = questionRepo.GetById("Question", questionId);
+            if (question == null)
+                return NotFound();
+
+            if (existing.IsAccepted)
+            {
+                // Unaccept
+                existing.IsAccepted = false;
+                question.IsThemeOpen = true;
+            }
+            else
+            {
+                // Accept
+                existing.IsAccepted = true;
+
+                // Close the discussion
+                question.IsThemeOpen = false;
+
+            }
+
             answerRepo.Update(existing);
+            questionRepo.Update(question);
 
-            // TODO: send message to Notification queue here
-
-            return Ok(existing);
+            return Ok(new
+            {
+                AnswerId = existing.RowKey,
+                IsAccepted = existing.IsAccepted,
+                IsThemeOpen = question.IsThemeOpen
+            });
         }
+
+
     }
 }

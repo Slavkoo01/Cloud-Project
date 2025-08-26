@@ -26,7 +26,7 @@ namespace StackOverflowService.Controllers
 
         [HttpGet]
         [Route("")]
-        public IHttpActionResult GetAll(string search = null, string loggedInUserId = null)
+        public IHttpActionResult GetAll(string search = null, string LoggedInUser = null)
         {
             var questions = questionRepo.GetAll().ToList();
 
@@ -55,6 +55,7 @@ namespace StackOverflowService.Controllers
                     Title = q.Title,
                     Decription = q.Description,
                     ImageUrl = q.ImageUrl,
+                    IsThemeOpen = q.IsThemeOpen,
                     CreatedAt = q.CreatedAt,
                     User = user == null ? null : new UserDto
                     {
@@ -77,9 +78,9 @@ namespace StackOverflowService.Controllers
 
                     // Has the logged-in user voted?
                     int userVote = 0;
-                    if (!string.IsNullOrEmpty(loggedInUserId))
+                    if (!string.IsNullOrEmpty(LoggedInUser))
                     {
-                        var userVoteEntity = votes.FirstOrDefault(v => v.Username == loggedInUserId);
+                        var userVoteEntity = votes.FirstOrDefault(v => v.RowKey == LoggedInUser);
                         if (userVoteEntity != null)
                             userVote = userVoteEntity.Value; // 1, -1
                     }
@@ -136,6 +137,7 @@ namespace StackOverflowService.Controllers
             req.PartitionKey = "Question";
             req.RowKey = Guid.NewGuid().ToString();
             req.CreatedAt = DateTime.UtcNow;
+            req.IsThemeOpen = true;
 
 
             questionRepo.Insert(req);
@@ -155,10 +157,14 @@ namespace StackOverflowService.Controllers
 
             existing.Title = req.Title;
             existing.Description = req.Description;
+            existing.ImageUrl = req.ImageUrl;
+            
+
             questionRepo.Update(existing);
 
             return Ok(existing);
         }
+
 
         [HttpDelete]
         [Route("{id}")]
@@ -168,9 +174,23 @@ namespace StackOverflowService.Controllers
             if (existing == null)
                 return NotFound();
 
+            // Delete all answers
+            var answers = answerRepo.GetAll(id).ToList();
+            foreach (var a in answers)
+            {
+                // Delete votes for each answer
+                var votes = voteRepo.GetAll(a.RowKey).ToList();
+                foreach (var v in votes)
+                    voteRepo.Delete(v);
+
+                answerRepo.Delete(a);
+            }
+
             questionRepo.Delete(existing);
+
             return Ok();
         }
+
 
         [HttpPost]
         [Route("{questionId}/upload-picture")]

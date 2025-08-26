@@ -4,6 +4,10 @@ import DropDownNavbar from "../../Components/DropDowns/DropDownNavbar";
 import SearchBar from "../SearchBars/SearchBar";
 import FormAskQuestion from "../Forms/FormAskQuestion"
 
+const DEFAULT_PROFILE_IMG =
+  "https://i.pinimg.com/736x/98/1d/6b/981d6b2e0ccb5e968a0618c8d47671da.jpg";
+
+
 export default function Navbar() {
   const [isDropDownOpen, setIsDropDownOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -66,13 +70,14 @@ export default function Navbar() {
               <img
                 src={user.ProfileImageUrl}
                 alt="profile"
-                className="w-10 h-10 rounded-full border border-gray-300"
+                className="w-10 h-10 rounded-full "
               />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">
-                {user.Name[0]}
-                {user.LastName[0]}
-              </div>
+              <img
+                src={DEFAULT_PROFILE_IMG}
+                alt="profile"
+                className="w-10 h-10 rounded-full "
+              />
             )}
             <span className="font-medium text-gray-800">{user.Name}</span>
           </button>

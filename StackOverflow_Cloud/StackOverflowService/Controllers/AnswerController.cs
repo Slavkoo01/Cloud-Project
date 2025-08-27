@@ -1,4 +1,6 @@
-﻿using ServiceDataRepo.Entities;
+﻿using Microsoft.WindowsAzure.Storage.Queue;
+using ServiceDataRepo.Entities;
+using ServiceDataRepo.Helpers;
 using ServiceDataRepo.Repositories;
 using StackOverflowService.Models;
 using System;
@@ -95,6 +97,81 @@ namespace StackOverflowService.Controllers
 
         }
 
+
+        // ToggleAccept -> skuplja emailove -> poziva SendEmails (Notify Servis) -> ubacuje poruke u Queue -> WorkerRole šalje emailove.
+        [HttpPost]
+        [Route("{questionId}/{answerId}/toggle-accept")]
+        public IHttpActionResult ToggleAccept(string questionId, string answerId)
+        {
+            var existing = answerRepo.GetById(questionId, answerId);
+            if (existing == null)
+                return NotFound();
+
+            var questionRepo = new QuestionTableRepository();
+            var question = questionRepo.GetById("Question", questionId);
+            if (question == null)
+                return NotFound();
+
+            if (existing.IsAccepted)
+            {
+                // Unaccept
+                existing.IsAccepted = false;
+                question.IsThemeOpen = true;
+            }
+            else
+            {
+                // Accept
+                existing.IsAccepted = true;
+                question.IsThemeOpen = false;
+
+                // 1. Pronađi sve korisnike koji su odgovorili
+                var allAnswers = answerRepo.GetAll(questionId).ToList();
+                List<UserEntity> usersToNotify = new List<UserEntity>();
+
+                foreach (var ans in allAnswers)
+                {
+                    var user = userRepo.GetById("User", ans.Username);
+                    if (user != null)
+                        usersToNotify.Add(user);
+                }
+
+                // 2. Izvuci emailove
+                List<string> emails = new List<string>();
+                foreach (var u in usersToNotify)
+                {
+                    if (!string.IsNullOrEmpty(u.Email) && !emails.Contains(u.Email))
+                        emails.Add(u.Email);
+                }
+
+                // 3. Dodaj poruke u Queue za NotificationService
+                if (emails.Any())
+                {
+                    CloudQueue queue = QueueHelper.GetQueueReference("admin-notifications-queue");
+
+                    string subject = "Answer Accepted!";
+                    string body = $"Your answer for question '{question.Title}' has been accepted.";
+
+                    foreach (var email in emails)
+                    {
+                        string message = $"HEALTHCHECK;Subject:{subject};Email:{email};Body:{body}";
+                        queue.AddMessage(new CloudQueueMessage(message));
+                    }
+                }
+            }
+
+            answerRepo.Update(existing);
+            questionRepo.Update(question);
+
+            return Ok(new
+            {
+                AnswerId = existing.RowKey,
+                IsAccepted = existing.IsAccepted,
+                IsThemeOpen = question.IsThemeOpen
+            });
+        }
+
+
+        /* Slavko implementacija, u slucaju da moje ne radi kako treba
         [HttpPost]
         [Route("{questionId}/{answerId}/toggle-accept")]
         public IHttpActionResult ToggleAccept(string questionId, string answerId)
@@ -156,7 +233,7 @@ namespace StackOverflowService.Controllers
                 IsThemeOpen = question.IsThemeOpen
             });
         }
-
+        */
 
     }
 }

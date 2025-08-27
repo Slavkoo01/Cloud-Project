@@ -1,0 +1,27 @@
+[
+  {
+    "Name": "New Profile",
+    "Projects": [
+      {
+        "Path": "StackOverflow_Cloud.ccproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "StackOverflowService\\StackOverflowService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "NotificationService\\NotificationService.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "HeathStatusServiceWeb\\HeathStatusServiceWeb.csproj",
+        "Action": "Start"
+      },
+      {
+        "Path": "HealthMonitoringService\\HealthMonitoringService.csproj",
+        "Action": "Start"
+      }
+    ]
+  }
+]

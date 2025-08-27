@@ -48,6 +48,8 @@ namespace HealthMonitoringService
                     string address = String.Format("net.tcp://{0}/{1}", endpoint.IPEndpoint, notificationInternalEndpointName);
                     try
                     {
+                        // treba insertovati DateTime, Status, Naziv_Servisa
+                        // 1 instanca worker health check role notification service, 2. health check treba da salje i pita, 2 threada, health service treba da samo vadi podatke iz te tabele i da ih pakuje na front
                         var factory = new ChannelFactory<INotificationService>(new NetTcpBinding(), new EndpointAddress(address));
                         var proxy = factory.CreateChannel();
 

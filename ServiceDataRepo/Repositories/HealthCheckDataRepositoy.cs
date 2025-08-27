@@ -43,5 +43,7 @@ namespace ServiceDataRepo.Repositories
             TableOperation insertOperation = TableOperation.Insert(newHealthCheck);
             _table.Execute(insertOperation);
         }
+        // izmeniti poslednja 2 chekca tako da uzimaju data samo u poslednja 3 sata
+        // 
     }
 }

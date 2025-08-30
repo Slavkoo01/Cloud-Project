@@ -103,6 +103,9 @@ namespace StackOverflowService.Controllers
         [Route("{questionId}/{answerId}/toggle-accept")]
         public IHttpActionResult ToggleAccept(string questionId, string answerId)
         {
+            //ovo ne ovdje -> po uslovu zad u queue ide samo answer ID,
+            //NotificationService radi pretragu tabela i salje mejlove
+ 
             var existing = answerRepo.GetById(questionId, answerId);
             if (existing == null)
                 return NotFound();
@@ -123,6 +126,12 @@ namespace StackOverflowService.Controllers
                 // Accept
                 existing.IsAccepted = true;
                 question.IsThemeOpen = false;
+
+                CloudQueue queue = QueueHelper.GetQueueReference("admin-notifications-queue");
+                queue.AddMessage(new CloudQueueMessage(answerId));
+
+                /*
+                 * Dakle ovaj dio ne ovdjeee
 
                 // 1. Pronađi sve korisnike koji su odgovorili
                 var allAnswers = answerRepo.GetAll(questionId).ToList();
@@ -157,6 +166,7 @@ namespace StackOverflowService.Controllers
                         queue.AddMessage(new CloudQueueMessage(message));
                     }
                 }
+                */
             }
 
             answerRepo.Update(existing);

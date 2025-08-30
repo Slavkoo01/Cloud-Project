@@ -27,6 +27,9 @@ export default function Register() {
   setError("");
   setSuccess("");
 
+  console.log("API URL:", import.meta.env.VITE_API_URL); //dodano
+  console.log(import.meta.env);
+
   // enforce uppercase keys
   const payload = {
     Name: formData.Name,

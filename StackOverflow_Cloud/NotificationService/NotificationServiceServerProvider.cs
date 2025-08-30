@@ -54,13 +54,15 @@ namespace NotificationService
         // Loguje notifikaciju u tabelu (opciono, može se kasnije dopuniti).
         public void LogNotification(NotificationLogEntity notificationLog)
         {
-            if (notificationLog == null)
+            if (notificationLog != null)
+            {
+                Trace.TraceInformation($"LogNotification called for: {notificationLog.RowKey}");
+            }
+            else
             {
                 Trace.TraceWarning("LogNotification called with null entity.");
                 return;
             }
-
-            Trace.TraceInformation($"LogNotification called for: {notificationLog.RowKey}");
             // Ovde bi išla implementacija za Azure Table storage ako želimo čuvanje logova.
         }
 

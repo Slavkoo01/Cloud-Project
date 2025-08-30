@@ -2,7 +2,9 @@ using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.Diagnostics;
 using Microsoft.WindowsAzure.ServiceRuntime;
 using Microsoft.WindowsAzure.Storage.Queue;
+using ServiceDataRepo.Entities;
 using ServiceDataRepo.Helpers;
+using ServiceDataRepo.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -96,6 +98,7 @@ namespace NotificationService
             string subject = String.Empty;
             string alertEmail = String.Empty;
             string body = String.Empty;
+            List<string> emails = new List<string>();
 
             if (message.StartsWith("HEALTHCHECK;"))
             {
@@ -105,6 +108,39 @@ namespace NotificationService
                 subject = parts[0].Split(new char[] { ':' }, 2)[1].Trim();
                 alertEmail = parts[1].Split(new char[] { ':' }, 2)[1].Trim();
                 body = parts[2].Split(new char[] { ':' }, 2)[1].Trim();
+                emails.Add(alertEmail);
+            }
+            else
+            {
+                // Onda je answerID i trazimo mejlove na koje saljemo..
+               
+                AnswerTableRepository answerRepo = new AnswerTableRepository();
+                QuestionTableRepository questionRepo = new QuestionTableRepository();
+                UserTableRepository userRepo = new UserTableRepository();
+                
+                var allAnswers = answerRepo.GetAll();
+                var answer = allAnswers.FirstOrDefault(a => a.RowKey == message); //message=answerId
+
+                if (answer != null)
+                {
+                    var answersToQuestion = answerRepo.GetAll(answer.QuestionId).ToList();
+                    
+                    foreach (var ans in answersToQuestion)
+                    {
+                        var user = userRepo.GetById("User", ans.Username);
+                        if (user != null)
+                        {
+                            if (!string.IsNullOrEmpty(user.Email) && !emails.Contains(user.Email))
+                            {
+                                emails.Add(user.Email);
+                            }
+                        }
+                    }
+
+                    var question = questionRepo.GetById("Question", answer.QuestionId); // ovo samo da ime nadjemo
+                    subject = "Answer Accepted!";
+                    body = $"Your answer for question '{question.Title}' has been accepted.";
+                }
             }
 
             using (var smtp = new SmtpClient(smtpHost, smtpPort))
@@ -112,10 +148,13 @@ namespace NotificationService
                 smtp.Credentials = new NetworkCredential(smtpUsername, smtpPassword);
                 smtp.EnableSsl = true;
 
-                var email = new MailMessage(smtpUsername, alertEmail, subject, body);
-                email.IsBodyHtml = true;
+                foreach (var emailAddress in emails)
+                {
+                    var email = new MailMessage(smtpUsername, emailAddress, subject, body);
+                    email.IsBodyHtml = true;
 
-                await smtp.SendMailAsync(email);
+                    await smtp.SendMailAsync(email);
+                }
             }
         }
 

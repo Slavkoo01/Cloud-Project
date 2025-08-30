@@ -23,27 +23,34 @@ namespace ServiceDataRepo.Repositories
             _table.CreateIfNotExists();
         }
 
+        // StackOverflowService health checks (samo poslednja 3h)
         public IQueryable<HealthCheckEntity> RetrieveAllHealthCheckEntities()
         {
+            var threeHoursAgo = DateTime.UtcNow.AddHours(-3);
+
             var results = from g in _table.CreateQuery<HealthCheckEntity>()
                           where g.PartitionKey == "StackOverflowService"
+                             && g.CheckedAt >= threeHoursAgo
                           select g;
             return results;
         }
 
+        // NotificationService health checks (samo poslednja 3h)
         public IQueryable<HealthCheckEntity> RetrieveAllNotificationkServiceHealthCheckEntities()
         {
+            var threeHoursAgo = DateTime.UtcNow.AddHours(-3);
+
             var results = from g in _table.CreateQuery<HealthCheckEntity>()
                           where g.PartitionKey == "NotificationService"
+                             && g.CheckedAt >= threeHoursAgo
                           select g;
             return results;
         }
+
         public void AddHealthCheckEntity(HealthCheckEntity newHealthCheck)
         {
             TableOperation insertOperation = TableOperation.Insert(newHealthCheck);
             _table.Execute(insertOperation);
         }
-        // izmeniti poslednja 2 chekca tako da uzimaju data samo u poslednja 3 sata
-        // 
     }
 }

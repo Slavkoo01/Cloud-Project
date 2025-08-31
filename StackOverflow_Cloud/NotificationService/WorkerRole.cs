@@ -20,8 +20,9 @@ namespace NotificationService
     {
         private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         private readonly ManualResetEvent runCompleteEvent = new ManualResetEvent(false);
-
         private NotificationServiceServer server = new NotificationServiceServer();
+        private NotificationEmailSentRepo notificationEmailRepo; // Dodaj ovo
+
         public override void Run()
         {
             CloudQueue notificationQueue = QueueHelper.GetQueueReference("admin-notifications-queue");
@@ -67,43 +68,231 @@ namespace NotificationService
 
         public override bool OnStart()
         {
-            // Use TLS 1.2 for Service Bus connections
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-
-            // Set the maximum number of concurrent connections
             ServicePointManager.DefaultConnectionLimit = 12;
-
-            // For information on handling configuration changes
-            // see the MSDN topic at https://go.microsoft.com/fwlink/?LinkId=166357.
 
             bool result = base.OnStart();
             server.Open();
-            Trace.TraceInformation("NotificationService has been started");
+            notificationEmailRepo = new NotificationEmailSentRepo(); // Inicijalizuj repo
 
+            Trace.TraceInformation("NotificationService has been started");
             return result;
         }
 
         public override void OnStop()
         {
             Trace.TraceInformation("NotificationService is stopping");
-
             this.cancellationTokenSource.Cancel();
             this.runCompleteEvent.WaitOne();
-
             base.OnStop();
             server.Close();
             Trace.TraceInformation("NotificationService has stopped");
         }
 
-        //srediti ovo poslijeee - myb odvojiti ovaj dio za slanje
-        private async Task SendAlertEmails(string message)
+        private void ProcessAdminMessages(CloudQueue adminQueue)
         {
-            // ovo mozemo u konfig
+            CloudQueueMessage message = adminQueue.GetMessage();
+            if (message != null)
+            {
+                Trace.TraceInformation($"Admin message received: {message.AsString}");
+
+                if (message.DequeueCount > 3)
+                {
+                    adminQueue.DeleteMessage(message);
+                    return;
+                }
+
+                try
+                {
+                    SendAlertEmails(message.AsString).GetAwaiter().GetResult();
+                    adminQueue.DeleteMessage(message);
+                    Trace.TraceInformation($"Admin message processed: {message.AsString}");
+                }
+                catch (Exception ex)
+                {
+                    Trace.TraceError($"Error processing admin message: {ex.Message}");
+                }
+            }
+        }
+
+        private void ProcessNotificationMessages(CloudQueue notificationQueue)
+        {
+            CloudQueueMessage message = notificationQueue.GetMessage();
+            if (message != null)
+            {
+                Trace.TraceInformation($"Notification message received: {message.AsString}");
+
+                if (message.DequeueCount > 3)
+                {
+                    notificationQueue.DeleteMessage(message);
+                    return;
+                }
+
+                try
+                {
+                    // Poruka sadrži ID odgovora koji je oznaèen kao najbolji
+                    if (Guid.TryParse(message.AsString, out Guid answerId))
+                    {
+                        ProcessBestAnswerNotification(answerId).GetAwaiter().GetResult();
+                        notificationQueue.DeleteMessage(message);
+                        Trace.TraceInformation($"Best answer notification processed for answer: {answerId}");
+                    }
+                    else
+                    {
+                        // Fallback - možda je obièna string vrednost answerId
+                        ProcessBestAnswerNotificationByString(message.AsString).GetAwaiter().GetResult();
+                        notificationQueue.DeleteMessage(message);
+                        Trace.TraceInformation($"Best answer notification processed for answer: {message.AsString}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Trace.TraceError($"Error processing notification message: {ex.Message}");
+                }
+            }
+        }
+
+        private async Task ProcessBestAnswerNotification(Guid answerId)
+        {
+            try
+            {
+                List<string> emails = new List<string>();
+
+                AnswerTableRepository answerRepo = new AnswerTableRepository();
+                QuestionTableRepository questionRepo = new QuestionTableRepository();
+                UserTableRepository userRepo = new UserTableRepository();
+
+                var allAnswers = answerRepo.GetAll();
+                var answer = allAnswers.FirstOrDefault(a => new Guid(a.RowKey) == answerId);
+
+                if (answer != null)
+                {
+                    var answersToQuestion = answerRepo.GetAll(answer.QuestionId).ToList();
+
+                    foreach (var ans in answersToQuestion)
+                    {
+                        var user = userRepo.GetById("User", ans.Username);
+                        if (user != null)
+                        {
+                            if (!string.IsNullOrEmpty(user.Email) && !emails.Contains(user.Email))
+                            {
+                                emails.Add(user.Email);
+                            }
+                        }
+                    }
+
+                    var question = questionRepo.GetById("Question", answer.QuestionId);
+                    string subject = "Answer Accepted!";
+                    string body = $"Your answer for question '{question?.Title}' has been accepted as the best answer.";
+
+                    // Pošalji emailove
+                    int emailCount = await SendNotificationEmails(emails, subject, body);
+
+                    // Zabeleži u tabelu broj poslanih emailova
+                    var notificationEntity = new NotificationEmailSentEntity(answerId, emailCount);
+                    notificationEmailRepo.AddNotificationEmailSent(notificationEntity);
+
+                    Trace.TraceInformation($"Best answer notification emails sent: {emailCount} for answer {answerId}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError($"Error processing best answer notification: {ex.Message}");
+                throw;
+            }
+        }
+
+        private async Task ProcessBestAnswerNotificationByString(string answerIdString)
+        {
+            try
+            {
+                List<string> emails = new List<string>();
+
+                AnswerTableRepository answerRepo = new AnswerTableRepository();
+                QuestionTableRepository questionRepo = new QuestionTableRepository();
+                UserTableRepository userRepo = new UserTableRepository();
+
+                var allAnswers = answerRepo.GetAll();
+                var answer = allAnswers.FirstOrDefault(a => a.RowKey == answerIdString);
+
+                if (answer != null)
+                {
+                    var answersToQuestion = answerRepo.GetAll(answer.QuestionId).ToList();
+
+                    foreach (var ans in answersToQuestion)
+                    {
+                        var user = userRepo.GetById("User", ans.Username);
+                        if (user != null)
+                        {
+                            if (!string.IsNullOrEmpty(user.Email) && !emails.Contains(user.Email))
+                            {
+                                emails.Add(user.Email);
+                            }
+                        }
+                    }
+
+                    var question = questionRepo.GetById("Question", answer.QuestionId);
+                    string subject = "Answer Accepted!";
+                    string body = $"Your answer for question '{question?.Title}' has been accepted as the best answer.";
+
+                    // Pošalji emailove
+                    int emailCount = await SendNotificationEmails(emails, subject, body);
+
+                    // Zabeleži u tabelu broj poslanih emailova (konvertuj string u Guid ako je moguæe)
+                    Guid answerId = Guid.TryParse(answerIdString, out Guid parsedGuid) ? parsedGuid : Guid.NewGuid();
+                    var notificationEntity = new NotificationEmailSentEntity(answerId, emailCount);
+                    notificationEmailRepo.AddNotificationEmailSent(notificationEntity);
+
+                    Trace.TraceInformation($"Best answer notification emails sent: {emailCount} for answer {answerIdString}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError($"Error processing best answer notification: {ex.Message}");
+                throw;
+            }
+        }
+
+        private async Task<int> SendNotificationEmails(List<string> recipients, string subject, string body)
+        {
             var smtpHost = "smtp.gmail.com";
             var smtpPort = 587;
             var smtpUsername = "projekat.drs6@gmail.com";
             var smtpPassword = "mlfb ayje vbez nnch";
-            //------------------------
+
+            int emailCount = 0;
+
+            using (var smtp = new SmtpClient(smtpHost, smtpPort))
+            {
+                smtp.Credentials = new NetworkCredential(smtpUsername, smtpPassword);
+                smtp.EnableSsl = true;
+
+                foreach (var recipient in recipients)
+                {
+                    try
+                    {
+                        var email = new MailMessage(smtpUsername, recipient, subject, body);
+                        email.IsBodyHtml = true;
+                        await smtp.SendMailAsync(email);
+                        emailCount++;
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.TraceError($"Failed to send email to {recipient}: {ex.Message}");
+                    }
+                }
+            }
+
+            return emailCount;
+        }
+
+        // Zadržava postojeæu logiku za health check emailove
+        private async Task SendAlertEmails(string message)
+        {
+            var smtpHost = "smtp.gmail.com";
+            var smtpPort = 587;
+            var smtpUsername = "projekat.drs6@gmail.com";
+            var smtpPassword = "mlfb ayje vbez nnch";
 
             string subject = String.Empty;
             string alertEmail = String.Empty;
@@ -185,7 +374,6 @@ namespace NotificationService
                 {
                     var email = new MailMessage(smtpUsername, emailAddress, subject, body);
                     email.IsBodyHtml = true;
-
                     await smtp.SendMailAsync(email);
                 }
             }
@@ -193,7 +381,6 @@ namespace NotificationService
 
         private async Task RunAsync(CancellationToken cancellationToken)
         {
-            // TODO: Replace the following with your own logic.
             while (!cancellationToken.IsCancellationRequested)
             {
                 Trace.TraceInformation("Working");

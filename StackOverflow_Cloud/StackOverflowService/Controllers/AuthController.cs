@@ -3,6 +3,7 @@ using Microsoft.Azure;
 using ServiceDataRepo.BlobRepositories;
 using ServiceDataRepo.Entities;
 using ServiceDataRepo.Repositories;
+using StackOverflowService.Service;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -33,7 +34,7 @@ namespace YourNamespace.Controllers
                 return BadRequest("Request body is missing.");
             }
 
-            
+
             var missingFields = new List<string>();
 
             if (string.IsNullOrWhiteSpace(req.Email)) missingFields.Add(nameof(req.Email));
@@ -54,7 +55,7 @@ namespace YourNamespace.Controllers
             var existing = users.FirstOrDefault(u => u.Email == req.Email);
             if (existing != null)
             {
-               return Content(HttpStatusCode.Conflict, "Email already exists");
+                return Content(HttpStatusCode.Conflict, "Email already exists");
             }
             existing = users.FirstOrDefault(u => u.Username == req.Username);
             if (existing != null)
@@ -62,6 +63,8 @@ namespace YourNamespace.Controllers
                 return Content(HttpStatusCode.Conflict, "Username already exists");
             }
 
+            var salt = HashPassword.GenSalt();
+            var hash = HashPassword.Hash(req.Password, salt);
 
             usersRepo.Insert(new UserEntity(req.Username)
             {
@@ -72,7 +75,8 @@ namespace YourNamespace.Controllers
                 City = req.City,
                 Address = req.Address,
                 Email = req.Email,
-                Password = req.Password,
+                Salt = Convert.ToBase64String(salt),
+                Password = hash,
                 ProfileImageUrl = req.ProfileImageUrl,
             });
 
@@ -83,8 +87,9 @@ namespace YourNamespace.Controllers
         [Route("login")]
         public IHttpActionResult Login(UserEntity req)
         {
-            var user = usersRepo.GetAll().ToList()
-                .FirstOrDefault(u => u.Email == req.Email && u.Password == req.Password);
+            var user = usersRepo.GetAll().ToList().FirstOrDefault(
+                    u => u.Email == req.Email &&
+                    u.Password == HashPassword.Hash(req.Password, Convert.FromBase64String(u.Salt)));
 
             if (user == null)
             {

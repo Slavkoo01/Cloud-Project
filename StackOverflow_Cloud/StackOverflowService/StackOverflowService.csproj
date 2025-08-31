@@ -139,6 +139,7 @@
     <Compile Include="Models\UserDto.cs" />
     <Compile Include="Models\VoteDto.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service\HashPassword.cs" />
     <Compile Include="WebRole.cs" />
   </ItemGroup>
   <ItemGroup>

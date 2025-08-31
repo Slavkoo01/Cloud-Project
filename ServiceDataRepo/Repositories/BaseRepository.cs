@@ -40,6 +40,8 @@ namespace Repositories.Repositories
 
         public T GetById(string partitionKey, string rowKey)
         {
+            Console.WriteLine(partitionKey);
+            Console.WriteLine(rowKey);
             var retrieveOperation = TableOperation.Retrieve<T>(partitionKey, rowKey);
             var result = _table.Execute(retrieveOperation);
             return result.Result as T;

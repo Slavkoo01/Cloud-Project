@@ -24,34 +24,44 @@ namespace NotificationService
         private NotificationServiceServer server = new NotificationServiceServer();
         public override void Run()
         {
-            CloudQueue queue = QueueHelper.GetQueueReference("admin-notifications-queue");
+            CloudQueue notificationQueue = QueueHelper.GetQueueReference("admin-notifications-queue");
+            CloudQueue answerQueue = QueueHelper.GetQueueReference("accepted-answers-queue");
 
             Trace.TraceInformation("NotificationService is running");
 
             while (true)
             {
-                CloudQueueMessage message = queue.GetMessage();
-                if (message == null)
-                {
-                    Trace.TraceInformation("Trenutno ne postoji poruka u redu.", "Information");
-                }
-                else
-                {
-                    Trace.TraceInformation(String.Format("Poruka glasi: {0}", message.AsString), "Information");
+                CloudQueueMessage notificationMessage = notificationQueue.GetMessage();
+                CloudQueueMessage answerMessage = answerQueue.GetMessage();
 
-                    if (message.DequeueCount > 3)
-                    {
-                        queue.DeleteMessage(message);
-                    }
-
-                    // sta raditi sa por
-                    SendAlertEmails(message.AsString).GetAwaiter().GetResult();
-                    //queue.DeleteMessage(message);
-                    Trace.TraceInformation($"Poruka procesuirana: {message.AsString}", "Information");
-                }
+                ProcessQueueMessage(notificationQueue, notificationMessage, "admin-notifications");
+                ProcessQueueMessage(answerQueue, answerMessage, "accepted-answers");
 
                 Thread.Sleep(5000);
                 Trace.TraceInformation("Working", "Information");
+            }
+        }
+        private void ProcessQueueMessage(CloudQueue queue, CloudQueueMessage message, string queueName)
+        {
+            if (message == null)
+            {
+                Trace.TraceInformation($"Trenutno ne postoji poruka u {queueName} redu.", "Information");
+            }
+            else
+            {
+                Trace.TraceInformation($"Poruka glasi: {message.AsString}", "Information");
+
+                if (message.DequeueCount > 3)
+                {
+                    queue.DeleteMessage(message);
+                }
+                else
+                {
+                    SendAlertEmails(message.AsString).GetAwaiter().GetResult();
+
+                    queue.DeleteMessage(message); // ovo zakom ako izadje greska
+                    Trace.TraceInformation($"Poruka procesuirana: {message.AsString}", "Information");
+                }
             }
         }
 
@@ -100,6 +110,9 @@ namespace NotificationService
             string body = String.Empty;
             List<string> emails = new List<string>();
 
+            if (message == null)
+                return;
+
             if (message.StartsWith("HEALTHCHECK;"))
             {
                 message = message.Substring("HEALTHCHECK;".Length);
@@ -113,33 +126,53 @@ namespace NotificationService
             else
             {
                 // Onda je answerID i trazimo mejlove na koje saljemo..
-               
-                AnswerTableRepository answerRepo = new AnswerTableRepository();
-                QuestionTableRepository questionRepo = new QuestionTableRepository();
-                UserTableRepository userRepo = new UserTableRepository();
-                
-                var allAnswers = answerRepo.GetAll();
-                var answer = allAnswers.FirstOrDefault(a => a.RowKey == message); //message=answerId
-
-                if (answer != null)
+                try
                 {
-                    var answersToQuestion = answerRepo.GetAll(answer.QuestionId).ToList();
-                    
-                    foreach (var ans in answersToQuestion)
+                    AnswerTableRepository answerRepo = new AnswerTableRepository();
+                    QuestionTableRepository questionRepo = new QuestionTableRepository();
+                    UserTableRepository userRepo = new UserTableRepository();
+
+
+                    List<AnswerEntity> allAnswers = answerRepo.GetAll().ToList();
+                    AnswerEntity answer = null;
+                    foreach (AnswerEntity e in allAnswers)
                     {
-                        var user = userRepo.GetById("User", ans.Username);
-                        if (user != null)
+                        if (e.RowKey == message)
                         {
-                            if (!string.IsNullOrEmpty(user.Email) && !emails.Contains(user.Email))
-                            {
-                                emails.Add(user.Email);
-                            }
+                            answer = e;
                         }
                     }
+                    //  AnswerEntity answer = allAnswers.FirstOrDefault(a => a.RowKey.Equals(message)); //message=answerId
 
-                    var question = questionRepo.GetById("Question", answer.QuestionId); // ovo samo da ime nadjemo
-                    subject = "Answer Accepted!";
-                    body = $"Your answer for question '{question.Title}' has been accepted.";
+                    if (answer != null)
+                    {
+                        var answersToQuestion = answerRepo.GetAll(answer.QuestionId).ToList();
+                        Console.WriteLine(allAnswers.Count());
+
+                        foreach (var ans in answersToQuestion)
+                        {
+                            var user = userRepo.GetById("User", ans.Username);
+                            if (user != null)
+                            {
+                                if (!string.IsNullOrEmpty(user.Email) && !emails.Contains(user.Email))
+                                {
+                                    emails.Add(user.Email);
+                                }
+                            }
+                        }
+
+
+                        var question = questionRepo.GetById("Question", answer.QuestionId); // ovo samo da ime nadjemo
+
+                        subject = "Answer Accepted!";
+                        //body = $"Your answer for question has been accepted.";
+                        body = $"Your answer for question '{question.Title}' has been accepted.";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error retrieving emails for answer ID {message}: {ex.Message}");
+                    return; // Exit if we can't retrieve emails
                 }
             }
 

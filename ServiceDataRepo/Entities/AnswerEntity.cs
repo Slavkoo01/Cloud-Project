@@ -21,6 +21,7 @@ namespace ServiceDataRepo.Entities
             CreatedAt = DateTime.UtcNow;
             VoteCount = 0;
             IsAccepted = false;
+            QuestionId = questionId;
         }
 
         public string QuestionId { get; set; }

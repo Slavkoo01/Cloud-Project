@@ -41,6 +41,7 @@ namespace StackOverflowService.Controllers
             req.CreatedAt = DateTime.UtcNow;
             req.VoteCount = 0;
             req.IsAccepted = false;
+            req.QuestionId = questionId;
 
             answerRepo.Insert(req);
             return Ok(req);
@@ -127,7 +128,7 @@ namespace StackOverflowService.Controllers
                 existing.IsAccepted = true;
                 question.IsThemeOpen = false;
 
-                CloudQueue queue = QueueHelper.GetQueueReference("admin-notifications-queue");
+                CloudQueue queue = QueueHelper.GetQueueReference("accepted-answers-queue");
                 queue.AddMessage(new CloudQueueMessage(answerId));
 
                 /*

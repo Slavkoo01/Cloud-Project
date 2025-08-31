@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -16,12 +16,21 @@ export default function Register() {
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [file, setFile] = useState(null);
+  
   const navigate = useNavigate();
+  const profileInputRef = useRef(null);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    if(selectedFile) {
+      setFile(selectedFile);
+    }
+  }
   const handleSubmit = async (e) => {
   e.preventDefault();
   setError("");
@@ -43,24 +52,55 @@ export default function Register() {
     Password: formData.Password,
   };
 
+  
   try {
+/*
+    const payload = new FormData();
+  Object.keys(formData).forEach((key) => {
+    payload.append(key, formData[key]);
+  });
+  if(file) {
+    payload.append("file", file);
+  }
+    */
+
     const res = await axios.post(
       `${import.meta.env.VITE_API_URL}/auth/register`,
-      payload
+      payload,
+
     );
 
     if (res.status === 200 && res.data === "User registered successfully") {
       setSuccess(res.data);
+      if (file) {
+        const uploadData = new FormData();
+        uploadData.append("file", file);
+
+        const resUpload = await axios.post(
+          `${import.meta.env.VITE_API_URL}/auth/register/${payload.Username}/upload-picture`,
+          uploadData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+         console.log("Message from cont:", resUpload.data.Message);
+        console.log("Uploaded image:", resUpload.data.ImageUrl);
+      }
+
       setTimeout(() => navigate("/login"), 1500);
     }
   } catch (err) {
     console.error(err);
     if (err.response && err.response.data) {
+      setSuccess("");
       setError(err.response.data);
     } else {
       setError("Registration failed. Try again.");
     }
   }
+
 };
 
 
@@ -108,6 +148,8 @@ export default function Register() {
         <input type="text" name="Address" placeholder="Address" value={formData.Address}
           onChange={handleChange} required
           className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-400" />
+        <input ref={profileInputRef} type="file" accept="image/*" onChange={handleFileChange} 
+        className="w-full px-4 py-2 border rounded-lg focus:ring focus:ring-blue-400" />
 
         {error && <p className="text-red-500 text-center">{error}</p>}
         {success && <p className="text-green-500 text-center">{success}</p>}

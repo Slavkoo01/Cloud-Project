@@ -37,12 +37,20 @@ namespace StackOverflowService.Controllers
 
                 voteRepo.Insert(newVote);
             }
+
             else
             {
-                // user already voted -> adjust count
-                if (existingVote.Value != voteDto.Vote)
+                if (existingVote.Value == voteDto.Vote)
                 {
-                    // remove old vote and apply new one
+                    // like pa like => obrisi vote
+                    answer.VoteCount -= existingVote.Value;
+                    answerRepo.Update(answer);
+
+                    voteRepo.Delete(existingVote);
+                }
+                else
+                {
+                    // izmjena glasa sa like na dislke i obrnuto
                     answer.VoteCount -= existingVote.Value;
                     answer.VoteCount += voteDto.Vote;
                     answerRepo.Update(answer);
@@ -50,8 +58,8 @@ namespace StackOverflowService.Controllers
                     existingVote.Value = voteDto.Vote;
                     voteRepo.Update(existingVote);
                 }
-                // else -> same vote as before, do nothing
             }
+           
 
             return Ok(new
             {

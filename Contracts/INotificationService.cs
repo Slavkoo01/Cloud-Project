@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Contracts
 {
     [ServiceContract]
-    public interface INotificationService
+    public interface INotificationService : IServiceHealthCheck
     {
         [OperationContract]
         void ProcessNotification(Guid answerId);    // NotificationService run metodaa - > 
@@ -23,8 +23,5 @@ namespace Contracts
         [OperationContract]
         void LogNotification(NotificationLogEntity notificationLog);
 
-
-        [OperationContract]
-        bool HealthCheck();
     }
 }

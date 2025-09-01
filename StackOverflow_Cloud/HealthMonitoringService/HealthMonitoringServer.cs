@@ -19,7 +19,7 @@ namespace HealthMonitoringService
     {
         private ServiceHost serviceHost;
         private string externalEndpointName = "HMonitor"; // endpoint za admin konzolu
-        private string notificationInternalEndpointName = "health-monitoring"; // endpoint NotificationService
+        private string internalEndpointName = "health-monitoring"; // endpoint NotificationService i StackOverFlowService
         private Timer timer;
 
         public HealthMonitoringServer()
@@ -36,126 +36,12 @@ namespace HealthMonitoringService
             timer.Start();
         }
 
-        /*
-        private async void Timer_Elapsed(object sender, ElapsedEventArgs e)
-        {
-            foreach (var role in RoleEnvironment.Roles)
-            {
-                Trace.WriteLine($"Role name: {role.Key}");
-                foreach (var instance in role.Value.Instances)
-                {
-                    Trace.WriteLine($"  Instance Id: {instance.Id}");
-                    foreach (var endpoint in instance.InstanceEndpoints)
-                    {
-                        Trace.WriteLine($"    Endpoint: {endpoint.Key} = {endpoint.Value.IPEndpoint}");
-                    }
-                }
-            }
-
-            try
-            {
-                // Ovdje dodati i za dr servis healthCheck 
-                // defff srediti kod
-
-                // Prolazi kroz sve instance NotificationService
-                foreach (var instance in RoleEnvironment.Roles["NotificationService"].Instances)
-                {
-                    var endpoint = instance.InstanceEndpoints[notificationInternalEndpointName];
-                    string address = String.Format("net.tcp://{0}/{1}", endpoint.IPEndpoint, notificationInternalEndpointName);
-                    try
-                    {
-                        // treba insertovati DateTime, Status, Naziv_Servisa
-                        // 1 instanca worker health check role notification service, 2. health check treba da salje i pita, 2 threada, health service treba da samo vadi podatke iz te tabele i da ih pakuje na front
-                        var factory = new ChannelFactory<INotificationService>(new NetTcpBinding(), new EndpointAddress(address));
-                        var proxy = factory.CreateChannel();
-
-                        bool isAlive = proxy.HealthCheck();
-                        if (isAlive)
-                            Trace.TraceInformation($"NotificationService instance {instance.Id} OK.");
-                        else
-                        {
-                            //too many emails for now
-                            //FailedHealthCheck("NotificationService");
-                            Trace.TraceWarning($"NotificationService instance {instance.Id} NOT OK!");
-                        }
-                        HealthCheckLog("NotificationService", isAlive ? "OK" : "NOT_OK");
-
-                    }
-                    catch (Exception exInstance)
-                    {
-                        Trace.TraceError($"Error connecting to NotificationService instance {instance.Id}: {exInstance.Message}");
-                        HealthCheckLog("NotificationService", "NOT_OK");
-
-                    }
-
-                }
-
-
-                try
-                {
-
-                    var instance = RoleEnvironment.Roles["StackOverflowService"].Instances[4];
-                    var endpoint = instance.InstanceEndpoints["Endpoint1"];
-                    string address = $"http://{endpoint.IPEndpoint}/api/health-monitoring";
-
-                    using (var client = new HttpClient())
-                    {
-                        var response = await client.GetAsync(address);
-                        if (response.IsSuccessStatusCode)
-                        {
-                            Trace.TraceInformation("StackOverflowService OK.");
-                            HealthCheckLog("StackOverflowService", "OK");
-                        }
-                        else
-                        {
-                            Trace.TraceWarning("StackOverflowService NOT OK!");
-                            HealthCheckLog("StackOverflowService", "NOT_OK");
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Trace.TraceError($"Error connecting to StackOverflowService: {ex.Message}");
-                    HealthCheckLog("StackOverflowService", "NOT_OK");
-                }
-
-
-            }
-            catch (Exception ex)
-            {
-                Trace.TraceError($"HealthMonitoringServer error: {ex.Message}");
-            }
-        }
-        */
         private void Timer_Elapsed(object sender = null, ElapsedEventArgs e = null)
         {
             try
             {
-                // Prolazi kroz sve instance NotificationService
-                foreach (var instance in RoleEnvironment.Roles["NotificationService"].Instances)
-                {
-                    var endpoint = instance.InstanceEndpoints[notificationInternalEndpointName];
-                    string address = String.Format("net.tcp://{0}/{1}", endpoint.IPEndpoint, notificationInternalEndpointName);
-                    try
-                    {
-                        var factory = new ChannelFactory<INotificationService>(new NetTcpBinding(), new EndpointAddress(address));
-                        var proxy = factory.CreateChannel();
-
-                        bool isAlive = proxy.HealthCheck();
-                        if (isAlive)
-                            Trace.TraceInformation($"NotificationService instance {instance.Id} OK.");
-                        else
-                            Trace.TraceWarning($"NotificationService instance {instance.Id} NOT OK!");
-
-                        HealthCheckLog("NotificationService", isAlive ? "OK" : "NOT_OK");
-
-                    }
-                    catch (Exception exInstance)
-                    {
-                        Trace.TraceError($"Error connecting to NotificationService instance {instance.Id}: {exInstance.Message}");
-                    }
-
-                }
+                HealthCheck("NotificationService");
+                HealthCheck("StackOverflowService");
             }
             catch (Exception ex)
             {
@@ -163,6 +49,33 @@ namespace HealthMonitoringService
             }
         }
 
+        private void HealthCheck(string serviceName)
+        {
+            foreach (var instance in RoleEnvironment.Roles[serviceName].Instances)
+            {
+                var endpoint = instance.InstanceEndpoints[internalEndpointName];
+                string address = String.Format("net.tcp://{0}/{1}", endpoint.IPEndpoint, internalEndpointName);
+                try
+                {
+                    var factory = new ChannelFactory<IServiceHealthCheck>(new NetTcpBinding(), new EndpointAddress(address));
+                    var proxy = factory.CreateChannel();
+                    proxy.HealthCheck();
+
+                    Trace.TraceInformation($"{serviceName} instance {instance.Id} OK.");
+                    HealthCheckLog(serviceName, "OK");
+                }
+                catch (EndpointNotFoundException ex)
+                {
+                    HealthCheckLog(serviceName, "NOT_OK");
+                    FailedHealthCheck(serviceName);
+                    Trace.TraceWarning($"{serviceName} instance {instance.Id} NOT OK! {ex.Message}");
+                }
+                catch (Exception exInstance)
+                {
+                    Trace.TraceError($"Error connecting to {serviceName} instance {instance.Id}: {exInstance.Message}");
+                }
+            }
+        }
         private void FailedHealthCheck(string serviceName)
         {
             // alert mejlovi u red
@@ -192,6 +105,7 @@ namespace HealthMonitoringService
                 Trace.TraceInformation($"HealthCheckEntity: {from.PartitionKey}, {from.RowKey}, {from.Status}, {from.CheckedAt}");
             }
             */
+            //OVO ISPRAVITI
         }
 
         public void Open()

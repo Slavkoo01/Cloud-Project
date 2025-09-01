@@ -66,11 +66,7 @@ namespace NotificationService
             // Ovde bi išla implementacija za Azure Table storage ako želimo čuvanje logova.
         }
 
-        // Health check za WCF servis.
-        public bool HealthCheck()
-        {
-            return true;
-        }
+        void IServiceHealthCheck.HealthCheck() {}
     }
 
 }

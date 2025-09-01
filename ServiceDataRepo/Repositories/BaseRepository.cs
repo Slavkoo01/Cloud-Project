@@ -20,7 +20,7 @@ namespace Repositories.Repositories
             CloudStorageAccount.Parse(configurationSetting);
             CloudTableClient tableClient = new CloudTableClient(new
             Uri(storageAccount.TableEndpoint.AbsoluteUri), storageAccount.Credentials);
-
+            
             _table = tableClient.GetTableReference(tableName);
             _table.CreateIfNotExists();
 

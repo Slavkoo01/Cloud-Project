@@ -25,9 +25,9 @@ namespace HealthStatusService.Controllers
             var recentEntities = notifEntities
                 .Concat(stackEntities)   // spoji obe liste
                 .Where(e => e.CheckedAt >= threeHoursAgo)
-                .OrderBy(e => e.CheckedAt)
+                .OrderByDescending(e => e.CheckedAt)
                 .ToList();
-          
+
             var dtoList = recentEntities.Select(e => new HealthCheckDTO
             {
                 ServiceName = e.PartitionKey,

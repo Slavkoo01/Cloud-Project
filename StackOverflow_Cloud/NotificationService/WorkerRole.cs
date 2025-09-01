@@ -133,7 +133,6 @@ namespace NotificationService
                             answer = e;
                         }
                     }
-                    //  AnswerEntity answer = allAnswers.FirstOrDefault(a => a.RowKey.Equals(message)); //message=answerId
 
                     if (answer != null)
                     {
@@ -156,7 +155,6 @@ namespace NotificationService
                         var question = questionRepo.GetById("Question", answer.QuestionId); // ovo samo da ime nadjemo
 
                         subject = $"Question {question.Title} is closed";
-                        //body = $"Your answer for question has been accepted.";
                         body = $"Answer by {answer.Username} has been accepted " + '\n' + $"{answer.Text}";
                     }
                 }

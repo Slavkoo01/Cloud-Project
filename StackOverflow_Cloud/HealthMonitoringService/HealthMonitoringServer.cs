@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Http;
 using System.ServiceModel;
 using System.Timers;
 using Contracts;
@@ -10,6 +11,7 @@ using Microsoft.WindowsAzure.Storage.Queue;
 using ServiceDataRepo.Entities;
 using ServiceDataRepo.Helpers;
 using ServiceDataRepo.Repositories;
+using static System.Net.WebRequestMethods;
 
 namespace HealthMonitoringService
 {
@@ -34,8 +36,22 @@ namespace HealthMonitoringService
             timer.Start();
         }
 
-        private void Timer_Elapsed(object sender = null, ElapsedEventArgs e = null)
+        /*
+        private async void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
+            foreach (var role in RoleEnvironment.Roles)
+            {
+                Trace.WriteLine($"Role name: {role.Key}");
+                foreach (var instance in role.Value.Instances)
+                {
+                    Trace.WriteLine($"  Instance Id: {instance.Id}");
+                    foreach (var endpoint in instance.InstanceEndpoints)
+                    {
+                        Trace.WriteLine($"    Endpoint: {endpoint.Key} = {endpoint.Value.IPEndpoint}");
+                    }
+                }
+            }
+
             try
             {
                 // Ovdje dodati i za dr servis healthCheck 
@@ -62,7 +78,76 @@ namespace HealthMonitoringService
                             //FailedHealthCheck("NotificationService");
                             Trace.TraceWarning($"NotificationService instance {instance.Id} NOT OK!");
                         }
-                        //HealthCheckLog("NotificationService", isAlive ? "OK" : "NOT_OK");
+                        HealthCheckLog("NotificationService", isAlive ? "OK" : "NOT_OK");
+
+                    }
+                    catch (Exception exInstance)
+                    {
+                        Trace.TraceError($"Error connecting to NotificationService instance {instance.Id}: {exInstance.Message}");
+                        HealthCheckLog("NotificationService", "NOT_OK");
+
+                    }
+
+                }
+
+
+                try
+                {
+
+                    var instance = RoleEnvironment.Roles["StackOverflowService"].Instances[4];
+                    var endpoint = instance.InstanceEndpoints["Endpoint1"];
+                    string address = $"http://{endpoint.IPEndpoint}/api/health-monitoring";
+
+                    using (var client = new HttpClient())
+                    {
+                        var response = await client.GetAsync(address);
+                        if (response.IsSuccessStatusCode)
+                        {
+                            Trace.TraceInformation("StackOverflowService OK.");
+                            HealthCheckLog("StackOverflowService", "OK");
+                        }
+                        else
+                        {
+                            Trace.TraceWarning("StackOverflowService NOT OK!");
+                            HealthCheckLog("StackOverflowService", "NOT_OK");
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Trace.TraceError($"Error connecting to StackOverflowService: {ex.Message}");
+                    HealthCheckLog("StackOverflowService", "NOT_OK");
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError($"HealthMonitoringServer error: {ex.Message}");
+            }
+        }
+        */
+        private void Timer_Elapsed(object sender = null, ElapsedEventArgs e = null)
+        {
+            try
+            {
+                // Prolazi kroz sve instance NotificationService
+                foreach (var instance in RoleEnvironment.Roles["NotificationService"].Instances)
+                {
+                    var endpoint = instance.InstanceEndpoints[notificationInternalEndpointName];
+                    string address = String.Format("net.tcp://{0}/{1}", endpoint.IPEndpoint, notificationInternalEndpointName);
+                    try
+                    {
+                        var factory = new ChannelFactory<INotificationService>(new NetTcpBinding(), new EndpointAddress(address));
+                        var proxy = factory.CreateChannel();
+
+                        bool isAlive = proxy.HealthCheck();
+                        if (isAlive)
+                            Trace.TraceInformation($"NotificationService instance {instance.Id} OK.");
+                        else
+                            Trace.TraceWarning($"NotificationService instance {instance.Id} NOT OK!");
+
+                        HealthCheckLog("NotificationService", isAlive ? "OK" : "NOT_OK");
 
                     }
                     catch (Exception exInstance)

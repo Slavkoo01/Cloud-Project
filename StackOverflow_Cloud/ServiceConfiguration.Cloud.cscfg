@@ -22,6 +22,12 @@
     <Instances count="1" />
     <ConfigurationSettings />
   </Role>
+  <Role name="HealthStatusService">
+    <Instances count="1" />
+    <ConfigurationSettings>
+      <Setting name="DataConnectionString" value="UseDevelopmentStorage=true" />
+    </ConfigurationSettings>
+  </Role>
   <NetworkConfiguration>
     <VirtualNetworkSite name="stackoverflow_cloudVNet" />
     <AddressAssignments>

@@ -48,6 +48,14 @@
       <RoleName>HealthMonitoringService</RoleName>
       <UpdateDiagnosticsConnectionStringOnPublish>True</UpdateDiagnosticsConnectionStringOnPublish>
     </ProjectReference>
+    <ProjectReference Include="HealthStatusService\HealthStatusService.csproj">
+      <Name>HealthStatusService</Name>
+      <Project>{3982257b-dee4-4f12-8e0c-345fd48a0679}</Project>
+      <Private>True</Private>
+      <RoleType>Web</RoleType>
+      <RoleName>HealthStatusService</RoleName>
+      <UpdateDiagnosticsConnectionStringOnPublish>True</UpdateDiagnosticsConnectionStringOnPublish>
+    </ProjectReference>
     <ProjectReference Include="HeathStatusServiceWeb\HeathStatusServiceWeb.csproj">
       <Name>HeathStatusServiceWeb</Name>
       <Project>{b15e0f24-0981-488c-aa8e-00e14f2fc84a}</Project>

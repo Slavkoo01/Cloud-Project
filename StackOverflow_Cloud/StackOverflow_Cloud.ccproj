@@ -56,14 +56,6 @@
       <RoleName>HealthStatusService</RoleName>
       <UpdateDiagnosticsConnectionStringOnPublish>True</UpdateDiagnosticsConnectionStringOnPublish>
     </ProjectReference>
-    <ProjectReference Include="HeathStatusServiceWeb\HeathStatusServiceWeb.csproj">
-      <Name>HeathStatusServiceWeb</Name>
-      <Project>{b15e0f24-0981-488c-aa8e-00e14f2fc84a}</Project>
-      <Private>True</Private>
-      <RoleType>Web</RoleType>
-      <RoleName>HeathStatusServiceWeb</RoleName>
-      <UpdateDiagnosticsConnectionStringOnPublish>True</UpdateDiagnosticsConnectionStringOnPublish>
-    </ProjectReference>
     <ProjectReference Include="NotificationService\NotificationService.csproj">
       <Name>NotificationService</Name>
       <Project>{79ef052a-f59d-445d-b316-b3e0b909b333}</Project>

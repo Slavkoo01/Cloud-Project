@@ -29,22 +29,9 @@
     </ConfigurationSettings>
     <Endpoints>
       <InputEndpoint name="Endpoint1" protocol="http" port="80" />
-		<!--DODANO za internal endpoint-->
-		<InternalEndpoint name="health-monitoring" protocol="tcp" />
-		<!---->
-    </Endpoints>
-  </WebRole>
-  <WebRole name="HeathStatusServiceWeb" vmsize="Standard_D1_v2">
-    <Sites>
-      <Site name="Web">
-        <Bindings>
-          <Binding name="Endpoint1" endpointName="Endpoint1" />
-        </Bindings>
-      </Site>
-    </Sites>
-    <ConfigurationSettings />
-    <Endpoints>
-      <InputEndpoint name="Endpoint1" protocol="http" port="8080" />
+      <!--DODANO za internal endpoint-->
+      <InternalEndpoint name="health-monitoring" protocol="tcp" />
+      <!---->
     </Endpoints>
   </WebRole>
   <WebRole name="HealthStatusService" vmsize="Standard_D1_v2">

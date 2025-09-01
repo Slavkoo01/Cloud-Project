@@ -127,8 +127,6 @@
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\AnswerController.cs" />
     <Compile Include="Controllers\AuthController.cs" />
-    <Compile Include="Controllers\HealthCheckController.cs" />
-    <Compile Include="Controllers\HealthController.cs" />
     <Compile Include="Controllers\QuestionController.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Controllers\VoteController.cs" />

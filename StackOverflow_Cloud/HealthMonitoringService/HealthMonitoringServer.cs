@@ -75,7 +75,9 @@ namespace HealthMonitoringService
                     Trace.TraceError($"Error connecting to {serviceName} instance {instance.Id}: {exInstance.Message}");
                 }
             }
-        }
+         
+            
+            }
         private void FailedHealthCheck(string serviceName)
         {
             // alert mejlovi u red
@@ -98,14 +100,7 @@ namespace HealthMonitoringService
         {
             HealthCheckDataRepository hctr = new HealthCheckDataRepository();
             hctr.AddHealthCheckEntity(new HealthCheckEntity(serviceName, status));
-            var fromList = hctr.RetrieveAllNotificationkServiceHealthCheckEntities();
-            /*
-            foreach (var from in fromList)
-            {
-                Trace.TraceInformation($"HealthCheckEntity: {from.PartitionKey}, {from.RowKey}, {from.Status}, {from.CheckedAt}");
-            }
-            */
-            //OVO ISPRAVITI
+         
         }
 
         public void Open()

@@ -7,7 +7,7 @@
     </ConfigurationSettings>
   </Role>
   <Role name="HealthMonitoringService">
-    <Instances count="1" />
+    <Instances count="2" />
     <ConfigurationSettings>
       <Setting name="DataConnectionString" value="UseDevelopmentStorage=true" />
     </ConfigurationSettings>

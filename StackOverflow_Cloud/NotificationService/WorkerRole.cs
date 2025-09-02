@@ -21,6 +21,8 @@ namespace NotificationService
         private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         private readonly ManualResetEvent runCompleteEvent = new ManualResetEvent(false);
         private NotificationServiceServer server = new NotificationServiceServer();
+        NotificationLogTableRepository logRepo = new NotificationLogTableRepository();
+
 
         public override void Run()
         {
@@ -113,6 +115,8 @@ namespace NotificationService
                 alertEmail = parts[1].Split(new char[] { ':' }, 2)[1].Trim();
                 body = parts[2].Split(new char[] { ':' }, 2)[1].Trim();
                 emails.Add(alertEmail);
+                LogInfo(emails);
+
             }
             else
             {
@@ -149,13 +153,16 @@ namespace NotificationService
                                     emails.Add(user.Email);
                                 }
                             }
+
                         }
 
-
+                        LogInfo(emails);
                         var question = questionRepo.GetById("Question", answer.QuestionId); // ovo samo da ime nadjemo
 
                         subject = $"Question {question.Title} is closed";
                         body = $"Answer by {answer.Username} has been accepted " + '\n' + $"{answer.Text}";
+
+                        
                     }
                 }
                 catch (Exception ex)
@@ -179,6 +186,12 @@ namespace NotificationService
             }
         }
 
+        private void LogInfo(List<string> emails)
+        { 
+            int count = emails.Count;
+            NotificationLogEntity logEntry = new NotificationLogEntity(count);
+            logRepo.Insert(logEntry);
+        }
         private async Task RunAsync(CancellationToken cancellationToken)
         {
             while (!cancellationToken.IsCancellationRequested)

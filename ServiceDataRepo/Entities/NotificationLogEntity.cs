@@ -12,11 +12,12 @@ namespace ServiceDataRepo.Entities
     {
         public NotificationLogEntity() { }
 
-        public NotificationLogEntity(string answerId)
+        public NotificationLogEntity(int count)
         {
             PartitionKey = "NotificationLog";
             RowKey = Guid.NewGuid().ToString();
-            AnswerId = answerId;
+            //AnswerId = answerId;
+            EmailsSentCount = count;
             SentAt = DateTime.UtcNow;
         }
 
